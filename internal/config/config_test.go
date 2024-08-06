@@ -1,6 +1,7 @@
 package config
 
 import (
+	"flag"
 	"os"
 	"testing"
 
@@ -9,12 +10,9 @@ import (
 
 func TestNewConfigWithEnvValues(t *testing.T) {
 	// Setting env values
-	err := os.Setenv("RUN_ADDRESS", "localhost:12323")
-	require.NoError(t, err)
-	err = os.Setenv("DATABASE_URI", "postgres")
-	require.NoError(t, err)
-	err = os.Setenv("ACCRUAL_SYSTEM_ADDRESS", "localhost:2222")
-	require.NoError(t, err)
+	t.Setenv("RUN_ADDRESS", "localhost:12323")
+	t.Setenv("DATABASE_URI", "postgres")
+	t.Setenv("ACCRUAL_SYSTEM_ADDRESS", "localhost:2222")
 
 	// Getting config
 	config, err := NewConfig()
@@ -27,6 +25,9 @@ func TestNewConfigWithEnvValues(t *testing.T) {
 }
 
 func TestNewConfigDefault(t *testing.T) {
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	os.Args = append([]string{os.Args[0], "-a=localhost:8080", "-d=postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "-r="}, os.Args...)
+
 	// Getting config
 	config, err := NewConfig()
 	require.NoError(t, err)

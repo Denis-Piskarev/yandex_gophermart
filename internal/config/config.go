@@ -14,7 +14,7 @@ type Config struct {
 	RunAddress string `env:"RUN_ADDRESS" envDefault:"localhost:8080"`
 	// DatabaseUri - uri of database
 	DatabaseUri string `env:"DATABASE_URI" envDefault:"postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"`
-	//AccuralSystemAddress - address of accrual system
+	// AccuralSystemAddress - address of accrual system
 	AccuralSystemAddress string `env:"ACCRUAL_SYSTEM_ADDRESS" envDefault:""`
 }
 
@@ -54,7 +54,7 @@ func getConnectionString(addr []string) string {
 		i = strings.Trim(i, `"`)
 		variables := strings.Split(i, "=")
 		switch variables[0] {
-		case "user":
+		case "users":
 			user = variables[1]
 		case "password":
 			pass = variables[1]
