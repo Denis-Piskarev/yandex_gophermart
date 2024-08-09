@@ -1,4 +1,4 @@
-package repository
+package internal
 
 type DBStore interface {
 }
