@@ -1,4 +1,4 @@
-package auth
+package internal
 
 // TokenInterface - operating with tokens
 type TokenInterface interface {

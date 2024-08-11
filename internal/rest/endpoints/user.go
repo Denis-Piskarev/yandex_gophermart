@@ -30,7 +30,7 @@ func (e *Endpoints) registerUser(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
-	if err := e.services.RegisterUser(); err != nil {
+	if err := e.services.RegisterUser(request.Login, request.Password); err != nil {
 		e.logger.Errorw("error registering user", "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
