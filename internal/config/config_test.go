@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -36,4 +37,11 @@ func TestNewConfigDefault(t *testing.T) {
 	require.Equal(t, "localhost:8080", config.RunAddress)
 	require.Equal(t, "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", config.DatabaseUri)
 	require.Equal(t, "", config.AccuralSystemAddress)
+}
+
+func TestConfig_getConnectionString(t *testing.T) {
+	parsedAddr := strings.Split("user=postgres password=postgres host=localhost port=5432 dbname=postgres sslmode=disable", " ")
+	addr := getConnectionString(parsedAddr)
+
+	require.Equal(t, "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", addr)
 }

@@ -54,7 +54,7 @@ func getConnectionString(addr []string) string {
 		i = strings.Trim(i, `"`)
 		variables := strings.Split(i, "=")
 		switch variables[0] {
-		case "users":
+		case "user":
 			user = variables[1]
 		case "password":
 			pass = variables[1]
