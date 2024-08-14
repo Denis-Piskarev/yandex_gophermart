@@ -3,7 +3,6 @@ package app
 import (
 	"context"
 	"database/sql"
-	"embed"
 	"fmt"
 	"github.com/DenisquaP/yandex_gophermart/internal/config"
 	_ "github.com/DenisquaP/yandex_gophermart/migrations"
@@ -19,17 +18,10 @@ import (
 func Run() {
 	ctx := context.Background()
 
-	newDev, err := zap.NewDevelopment()
+	logger, err := initLogger()
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer func() {
-		if err := newDev.Sync(); err != nil {
-			log.Println(fmt.Errorf("failed to sync %w", err))
-		}
-	}()
-
-	logger := newDev.Sugar()
 
 	cfg, err := config.NewConfig()
 	if err != nil {
@@ -60,12 +52,9 @@ func runServer(cfg *config.Config, logger *zap.SugaredLogger) {
 	logger.Infow(fmt.Sprintf("Starting server on %s...", cfg))
 }
 
-//go:embed *.go
-var embedMigrations embed.FS
-
 // Migrates to database
 func migrate(logger *zap.SugaredLogger, addr string) error {
-	db, err := sql.Open("postgres", addr)
+	db, err := sql.Open("pgx", addr)
 	if err != nil {
 		logger.Errorw("Failed to open DB", "error", err)
 
@@ -84,4 +73,19 @@ func migrate(logger *zap.SugaredLogger, addr string) error {
 	}
 
 	return nil
+}
+
+// Creates new sugared logger
+func initLogger() (*zap.SugaredLogger, error) {
+	newDev, err := zap.NewDevelopment()
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		if err := newDev.Sync(); err != nil {
+			log.Println(fmt.Errorf("failed to sync %w", err))
+		}
+	}()
+
+	return newDev.Sugar(), nil
 }
