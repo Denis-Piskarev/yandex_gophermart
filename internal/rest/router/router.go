@@ -1,26 +1,27 @@
 package router
 
 import (
-	"github.com/DenisquaP/yandex_gophermart/internal"
+	"github.com/DenisquaP/yandex_gophermart/internal/rest/endpoints"
 	"github.com/go-chi/chi/v5"
-	"go.uber.org/zap"
 	"net/http"
 )
 
 type Router struct {
-	service internal.Manager
-	logger  *zap.SugaredLogger
+	Endpoints *endpoints.Endpoints
 }
 
-func NewRouter(service internal.Manager, logger *zap.SugaredLogger) *Router {
+func NewRouter(endpoints *endpoints.Endpoints) *Router {
 	return &Router{
-		service: service,
-		logger:  logger,
+		Endpoints: endpoints,
 	}
 }
 
-func NewRouterWithMiddleware(logger *zap.SugaredLogger, service internal.Manager) (http.Handler, error) {
+func NewRouterWithMiddleware(endpoints *endpoints.Endpoints) http.Handler {
+	router := NewRouter(endpoints)
+
 	r := chi.NewRouter()
 
-	return r, nil
+	r.Mount("/", router.NewUserRouter())
+
+	return r
 }

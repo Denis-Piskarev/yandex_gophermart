@@ -2,17 +2,14 @@ package PostgreSQL
 
 import (
 	"github.com/jackc/pgx/v5"
-	"go.uber.org/zap"
 )
 
 type Repository struct {
-	db     *pgx.Conn
-	logger *zap.SugaredLogger
+	db *pgx.Conn
 }
 
-func NewRepository(db *pgx.Conn, logger *zap.SugaredLogger) *Repository {
+func NewRepository(db *pgx.Conn) *Repository {
 	return &Repository{
-		db:     db,
-		logger: logger,
+		db: db,
 	}
 }

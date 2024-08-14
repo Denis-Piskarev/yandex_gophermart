@@ -8,7 +8,8 @@ import (
 )
 
 func Test_generateHash(t *testing.T) {
-	hash, err := generateHash("userPassword")
+	a := UserAuth{}
+	hash, err := a.GetHashedPassword("userPassword")
 	require.NoError(t, err)
 
 	require.NotEmpty(t, hash)

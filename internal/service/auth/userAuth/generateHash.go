@@ -5,8 +5,8 @@ import (
 	"encoding/hex"
 )
 
-// Func generate hash from password to store secure data
-func generateHash(password string) (string, error) {
+// GetHashedPassword - generate hash from password to store secure data
+func (a *UserAuth) GetHashedPassword(password string) (string, error) {
 	hash := sha256.New()
 
 	hash.Write([]byte(password))

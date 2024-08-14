@@ -4,9 +4,16 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"net/http"
+
 	"github.com/DenisquaP/yandex_gophermart/internal/config"
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
+	"github.com/DenisquaP/yandex_gophermart/internal/repository/PostgreSQL"
+	"github.com/DenisquaP/yandex_gophermart/internal/rest/endpoints"
+	"github.com/DenisquaP/yandex_gophermart/internal/rest/router"
+	"github.com/DenisquaP/yandex_gophermart/internal/service"
 	_ "github.com/DenisquaP/yandex_gophermart/migrations"
+
 	"github.com/jackc/pgx/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -36,22 +43,29 @@ func Run() {
 	}()
 
 	if err := migrate(cfg.DatabaseUri); err != nil {
-		logger.Logger.Fatalw("Failed to migrate database", "error", err)
-
 		return
 	}
 
-	runServer(cfg)
+	repo := PostgreSQL.NewRepository(conn)
+	serv := service.NewService(repo)
+	endPoints := endpoints.NewEndpoints(serv)
+	routes := router.NewRouterWithMiddleware(endPoints)
+
+	runServer(cfg, routes)
 }
 
 // runServer - starts server
-func runServer(cfg *config.Config) {
+func runServer(cfg *config.Config, handler http.Handler) {
 	logger.Logger.Infow(fmt.Sprintf("Starting server on %s...", cfg))
+
+	if err := http.ListenAndServe(cfg.RunAddress, handler); err != nil {
+		logger.Logger.Fatalw("Failed to start server", "error", err)
+	}
 }
 
 // Migrates to database
 func migrate(addr string) error {
-	db, err := sql.Open("postgres", addr)
+	db, err := sql.Open("pgx", addr)
 	if err != nil {
 		logger.Logger.Errorw("Failed to open DB", "error", err)
 

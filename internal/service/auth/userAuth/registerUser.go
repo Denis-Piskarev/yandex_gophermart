@@ -2,19 +2,24 @@ package userAuth
 
 import (
 	"context"
-	"go.uber.org/zap"
-	"net/http"
+	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 )
 
-func (a *UserAuth) Register(ctx context.Context, username string, password string) error {
-	_, err := generateHash(password)
+func (a *UserAuth) RegisterUser(ctx context.Context, username string, password string) error {
+	// check if login already occupied
+	if err := a.db.CheckLogin(ctx, username); err != nil {
+		return err
+	}
+
+	// generating hash from password
+	hashPassword, err := a.GetHashedPassword(password)
 	if err != nil {
-		a.logger.Errorw("error while generating hash",
-			"error", err,
-			zap.Int("status_code", http.StatusInternalServerError))
+		logger.Logger.Errorw("error while generating hash",
+			"error", err)
 
 		return err
 	}
 
-	return nil
+	// registering user
+	return a.db.Register(ctx, username, hashPassword)
 }

@@ -2,17 +2,14 @@ package userAuth
 
 import (
 	"github.com/DenisquaP/yandex_gophermart/internal"
-	"go.uber.org/zap"
 )
 
 type UserAuth struct {
-	db     internal.DBStore
-	logger *zap.SugaredLogger
+	db internal.DBStore
 }
 
-func NewUserAuth(db internal.DBStore, logger *zap.SugaredLogger) *UserAuth {
+func NewUserAuth(db internal.DBStore) *UserAuth {
 	return &UserAuth{
-		db:     db,
-		logger: logger,
+		db: db,
 	}
 }
