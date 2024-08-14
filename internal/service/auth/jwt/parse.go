@@ -3,9 +3,12 @@ package jwt
 import (
 	"errors"
 	"fmt"
-	"github.com/DenisquaP/yandex_gophermart/internal/models"
-	"github.com/golang-jwt/jwt/v5"
 	"net/http"
+
+	"github.com/golang-jwt/jwt/v5"
+
+	"github.com/DenisquaP/yandex_gophermart/internal/logger"
+	"github.com/DenisquaP/yandex_gophermart/internal/models"
 )
 
 // ParseToken - checking token. Returning login and error
@@ -19,7 +22,7 @@ func (j *JWT) ParseToken(tokenString string) (int, error) {
 		return []byte(SecretKey), nil
 	})
 	if err != nil {
-		j.logger.Errorw("error while parsing token", "error", err)
+		logger.Logger.Errorw("error while parsing token", "error", err)
 
 		if errors.Is(err, jwt.ErrTokenExpired) {
 			return 0, models.NewCustomError("token is expired", http.StatusUnauthorized)
@@ -40,7 +43,7 @@ func (j *JWT) ParseToken(tokenString string) (int, error) {
 	// get userId from claims
 	userId, ok := claims["userId"].(float64)
 	if !ok {
-		j.logger.Errorw("variable type conversion error")
+		logger.Logger.Errorw("variable type conversion error")
 
 		return 0, fmt.Errorf("variable type conversion error")
 	}

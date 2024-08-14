@@ -1,8 +1,11 @@
 package jwt
 
 import (
-	"github.com/golang-jwt/jwt/v5"
 	"time"
+
+	"github.com/DenisquaP/yandex_gophermart/internal/logger"
+
+	"github.com/golang-jwt/jwt/v5"
 )
 
 // GenerateToken - generating tokens token by userId. Returning token and error
@@ -15,7 +18,7 @@ func (j *JWT) GenerateToken(userId int) (string, error) {
 
 	tokenString, err := claims.SignedString([]byte(SecretKey))
 	if err != nil {
-		j.logger.Errorw("error generating token", "err", err)
+		logger.Logger.Errorw("error generating token", "err", err)
 
 		return "", err
 	}
