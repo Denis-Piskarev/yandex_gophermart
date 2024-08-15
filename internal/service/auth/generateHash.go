@@ -1,4 +1,4 @@
-package userAuth
+package auth
 
 import (
 	"crypto/sha256"
@@ -6,10 +6,10 @@ import (
 )
 
 // GetHashedPassword - generate hash from password to store secure data
-func (a *UserAuth) GetHashedPassword(password string) (string, error) {
+func (a *UserAuth) GetHashedPassword(password string) string {
 	hash := sha256.New()
 
 	hash.Write([]byte(password))
 
-	return hex.EncodeToString(hash.Sum(nil)), nil
+	return hex.EncodeToString(hash.Sum(nil))
 }

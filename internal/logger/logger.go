@@ -9,7 +9,10 @@ import (
 var Logger *zap.SugaredLogger
 
 func NewLogger() {
-	newDev, err := zap.NewDevelopment()
+	cfg := zap.NewDevelopmentConfig()
+	cfg.EncoderConfig.StacktraceKey = "" // disabling tracing error
+
+	newDev, err := cfg.Build()
 	if err != nil {
 		log.Fatal(err)
 	}

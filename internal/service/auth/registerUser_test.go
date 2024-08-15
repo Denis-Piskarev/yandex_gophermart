@@ -1,4 +1,4 @@
-package userAuth
+package auth
 
 import (
 	"testing"

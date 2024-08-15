@@ -9,7 +9,7 @@ import (
 // OrderInterface - operates with user`s orders
 type OrderInterface interface {
 	// UploadOrder - upload new order into service
-	UploadOrder(ctx context.Context, userId string, order orders.Order) error
+	UploadOrder(ctx context.Context, userId int, order *orders.Order) error
 	// GetOrders - gets orders of current user. Returns slice of orders and error
-	GetOrders(ctx context.Context, userId string) ([]orders.Order, error)
+	GetOrders(ctx context.Context, userId int) ([]*orders.Order, error)
 }

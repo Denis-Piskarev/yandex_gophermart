@@ -16,14 +16,17 @@ func upInitMigration(ctx context.Context, tx *sql.Tx) error {
 		CREATE TABLE IF NOT EXISTS users (
 		    id SERIAL,
 		    login varchar(255) NOT NULL,
-		    password varchar(255) NOT NULL
+		    password varchar(255) NOT NULL,
+		    current FLOAT,
+		    withdrawn INT
 		);
 
 		CREATE TABLE IF NOT EXISTS orders (
-		    number INT NOT NULL,
+		    id SERIAL,
+		    number varchar(255) NOT NULL,
 		    status varchar(255) NOT NULL,
 		    accural INT,
-		    uploaded_at timestamp NOT NULL default now(),
+		    uploaded_at timestamptz NOT NULL default now(),
 		    user_id INT NOT NULL
 		)
 	`

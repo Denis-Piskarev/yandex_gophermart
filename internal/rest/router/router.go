@@ -1,27 +1,35 @@
 package router
 
 import (
+	"github.com/DenisquaP/yandex_gophermart/internal"
 	"github.com/DenisquaP/yandex_gophermart/internal/rest/endpoints"
+	"github.com/DenisquaP/yandex_gophermart/internal/rest/middlewares"
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"net/http"
 )
 
-type Router struct {
-	Endpoints *endpoints.Endpoints
-}
-
-func NewRouter(endpoints *endpoints.Endpoints) *Router {
-	return &Router{
-		Endpoints: endpoints,
-	}
-}
-
-func NewRouterWithMiddleware(endpoints *endpoints.Endpoints) http.Handler {
-	router := NewRouter(endpoints)
+func NewRouterWithMiddleware(endpoints *endpoints.Endpoints, services *internal.ServiceInterface) http.Handler {
+	//router := NewRouter(endpoints)
 
 	r := chi.NewRouter()
+	r.Use(middleware.Logger) // middleware to logging request
 
-	r.Mount("/", router.NewUserRouter())
+	r.Route("/user", func(r chi.Router) {
+		r.Post("/register", endpoints.RegisterUser)
+		r.Post("/login", endpoints.LoginUser)
+
+		r.Route("/", func(r chi.Router) {
+			r.Use(middlewares.IsAuthorized(services))
+
+			r.Route("/orders", func(r chi.Router) {
+				r.Use(middlewares.IsAuthorized(services))
+
+				// add orders router
+				r.Get("/", endpoints.GetOrders)
+			})
+		})
+	})
 
 	return r
 }

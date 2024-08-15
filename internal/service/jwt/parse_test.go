@@ -3,7 +3,7 @@ package jwt
 import (
 	"errors"
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
-	"github.com/DenisquaP/yandex_gophermart/internal/models"
+	"github.com/DenisquaP/yandex_gophermart/internal/models/customErrors"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
@@ -34,7 +34,7 @@ func TestJWT_ParseToken_expiredToken(t *testing.T) {
 	expiredToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MjM1MzU5MjQsImlhdCI6MTcyMzUzOTUyNCwidXNlcklkIjoxfQ.8xN6IK8gbRXyroc_ufk-BqOQwGFyEomfdj_whX9Vy1g"
 
 	_, err := jwt.ParseToken(expiredToken)
-	var cErr models.CustomError
+	var cErr customErrors.CustomError
 	if errors.As(err, &cErr) {
 		require.Equal(t, http.StatusUnauthorized, cErr.StatusCode)
 	}
@@ -46,7 +46,7 @@ func TestJWT_ParseToken_wrongToken(t *testing.T) {
 	expiredToken := "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
 
 	_, err := jwt.ParseToken(expiredToken)
-	var cErr models.CustomError
+	var cErr customErrors.CustomError
 	if errors.As(err, &cErr) {
 		require.Equal(t, http.StatusBadRequest, cErr.StatusCode)
 	}

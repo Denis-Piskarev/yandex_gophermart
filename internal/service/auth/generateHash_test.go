@@ -1,4 +1,4 @@
-package userAuth
+package auth
 
 import (
 	"fmt"
@@ -9,8 +9,7 @@ import (
 
 func Test_generateHash(t *testing.T) {
 	a := UserAuth{}
-	hash, err := a.GetHashedPassword("userPassword")
-	require.NoError(t, err)
+	hash := a.GetHashedPassword("userPassword")
 
 	require.NotEmpty(t, hash)
 	fmt.Println(hash)
