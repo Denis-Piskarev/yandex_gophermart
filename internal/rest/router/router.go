@@ -22,11 +22,16 @@ func NewRouterWithMiddleware(endpoints *endpoints.Endpoints, services *internal.
 		r.Route("/", func(r chi.Router) {
 			r.Use(middlewares.IsAuthorized(services))
 
-			r.Route("/orders", func(r chi.Router) {
-				r.Use(middlewares.IsAuthorized(services))
+			r.Get("/withdrawals", endpoints.GetWithdrawals)
 
+			r.Route("/orders", func(r chi.Router) {
 				// add orders router
 				r.Get("/", endpoints.GetOrders)
+			})
+
+			r.Route("/balance", func(r chi.Router) {
+				// add orders router
+				r.Get("/", endpoints.GetBalance)
 			})
 		})
 	})

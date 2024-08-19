@@ -2,7 +2,6 @@ package internal
 
 import (
 	"context"
-
 	"github.com/DenisquaP/yandex_gophermart/internal/models/orders"
 )
 

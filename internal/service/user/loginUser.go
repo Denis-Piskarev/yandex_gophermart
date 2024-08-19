@@ -1,4 +1,4 @@
-package auth
+package user
 
 import (
 	"context"
@@ -7,11 +7,11 @@ import (
 	"net/http"
 )
 
-func (a *UserAuth) LoginUser(ctx context.Context, username, password string) (string, error) {
+func (u *User) LoginUser(ctx context.Context, username, password string) (string, error) {
 	// generating hash from password
-	hashPassword := a.GetHashedPassword(password)
+	hashPassword := u.GetHashedPassword(password)
 
-	userId, err := a.db.Login(ctx, username, hashPassword)
+	userId, err := u.db.Login(ctx, username, hashPassword)
 	if err != nil {
 		return "", err
 	}
@@ -29,7 +29,7 @@ func (a *UserAuth) LoginUser(ctx context.Context, username, password string) (st
 	}
 
 	// generating token
-	token, err := a.token.GenerateToken(userId)
+	token, err := u.token.GenerateToken(userId)
 
 	return token, err
 }

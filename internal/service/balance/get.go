@@ -1,7 +1,11 @@
 package balance
 
-import "context"
+import (
+	"context"
 
-func (b *Balance) GetBalance(ctx context.Context, userId string) (float64, error) {
-	return 0, nil
+	modelsBalance "github.com/DenisquaP/yandex_gophermart/internal/models/balance"
+)
+
+func (b *Balance) GetBalance(ctx context.Context, userId int) (modelsBalance.Balance, error) {
+	return b.db.GetBalance(ctx, userId)
 }

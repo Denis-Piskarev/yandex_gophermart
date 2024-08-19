@@ -17,8 +17,8 @@ func upInitMigration(ctx context.Context, tx *sql.Tx) error {
 		    id SERIAL,
 		    login varchar(255) NOT NULL,
 		    password varchar(255) NOT NULL,
-		    current FLOAT,
-		    withdrawn INT
+		    current FLOAT DEFAULT 0,
+		    withdrawn INT  DEFAULT 0
 		);
 
 		CREATE TABLE IF NOT EXISTS orders (
@@ -28,6 +28,14 @@ func upInitMigration(ctx context.Context, tx *sql.Tx) error {
 		    accural INT,
 		    uploaded_at timestamptz NOT NULL default now(),
 		    user_id INT NOT NULL
+		);
+
+		CREATE TABLE IF NOT EXISTS withdrawals (
+		    id SERIAL,
+		    user_id INT NOT NULL,
+		    number varchar(255) NOT NULL,
+		    sum INT NOT NULL,
+		    processed_at timestamptz NOT NULL default now()
 		)
 	`
 

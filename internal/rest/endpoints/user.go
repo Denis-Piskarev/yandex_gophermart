@@ -48,11 +48,12 @@ func (e *Endpoints) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie := http.Cookie{
-		Name:  "gopherToken",
-		Value: token,
-	}
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, &http.Cookie{
+		Name:   "gopherToken",
+		Value:  token,
+		Path:   "/user",
+		Domain: "localhost",
+	})
 }
 
 func (e *Endpoints) LoginUser(w http.ResponseWriter, r *http.Request) {
@@ -92,11 +93,45 @@ func (e *Endpoints) LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cookie := http.Cookie{
+	http.SetCookie(w, &http.Cookie{
 		Name:  "gopherToken",
 		Value: token,
+	})
+}
+
+func (e *Endpoints) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
+	userId, err := getUserIdFromHeader(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		return
 	}
-	http.SetCookie(w, &cookie)
+
+	withdrawals, err := e.services.GetWithdrawals(r.Context(), userId)
+	if err != nil {
+		var cErr customErrors.CustomError
+		// if we got custom err then set status code from err
+		if errors.As(err, &cErr) {
+			http.Error(w, cErr.Error(), cErr.StatusCode)
+
+			return
+		}
+
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	wByte, err := json.Marshal(withdrawals)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if _, err := w.Write(wByte); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		return
+	}
 }
 
 // Checks if login or password is empty

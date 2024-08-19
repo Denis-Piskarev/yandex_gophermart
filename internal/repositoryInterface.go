@@ -2,7 +2,9 @@ package internal
 
 import (
 	"context"
+	modelsBalance "github.com/DenisquaP/yandex_gophermart/internal/models/balance"
 	"github.com/DenisquaP/yandex_gophermart/internal/models/orders"
+	modelsUser "github.com/DenisquaP/yandex_gophermart/internal/models/users"
 )
 
 // DBStore - interface of database
@@ -19,4 +21,8 @@ type DBStore interface {
 	GetOrders(ctx context.Context, userId int) ([]*orders.Order, error)
 	// UpdateStatus - updates status of order
 	UpdateStatus(ctx context.Context, userId int, order *orders.Order) error
+	// GetBalance - gets balance of current user. If user has no balance - return {0, 0}
+	GetBalance(ctx context.Context, userId int) (modelsBalance.Balance, error)
+	// GetWithdrawals - gets withdrawals of user. Returns custom error from models if user has no withdrawals
+	GetWithdrawals(ctx context.Context, userId int) ([]*modelsUser.Withdrawals, error)
 }

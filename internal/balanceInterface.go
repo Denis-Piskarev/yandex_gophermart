@@ -1,11 +1,15 @@
 package internal
 
-import "context"
+import (
+	"context"
+
+	modelsBalance "github.com/DenisquaP/yandex_gophermart/internal/models/balance"
+)
 
 // BalanceKeeper - operate with orders
 type BalanceKeeper interface {
 	// GetBalance - gets balance of user
-	GetBalance(ctx context.Context, userId string) (float64, error)
+	GetBalance(ctx context.Context, userId int) (modelsBalance.Balance, error)
 	// WithdrawBalance -
-	WithdrawBalance(ctx context.Context, userId string, amount float64) error
+	WithdrawBalance(ctx context.Context, userId int, amount float64) error
 }
