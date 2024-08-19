@@ -10,6 +10,7 @@ import (
 	userModels "github.com/DenisquaP/yandex_gophermart/internal/models/users"
 )
 
+// RegisterUser - registers user
 func (e *Endpoints) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var request userModels.RegisterReq
 
@@ -56,6 +57,7 @@ func (e *Endpoints) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// LoginUser - use fro login user
 func (e *Endpoints) LoginUser(w http.ResponseWriter, r *http.Request) {
 	var request userModels.RegisterReq
 
@@ -99,6 +101,7 @@ func (e *Endpoints) LoginUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// GetWithdrawals - gets user`s withdrawals
 func (e *Endpoints) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
 	userId, err := getUserIdFromHeader(r)
 	if err != nil {

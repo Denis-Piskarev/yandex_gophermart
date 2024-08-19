@@ -8,19 +8,12 @@ import (
 	"github.com/DenisquaP/yandex_gophermart/internal/service/user"
 )
 
-type Service struct {
-	auth    *user.User
-	balance *balance.Balance
-	order   *order.Order
-	token   *jwt.JWT
-}
-
-func NewService(store internal.DBStore) *internal.ServiceInterface {
+func NewService(store internal.DBStore, accuralSystemAddress string) *internal.Service {
 	token := jwt.NewJWT()
-	return &internal.ServiceInterface{
+	return &internal.Service{
 		AuthInterface:  user.NewUserAuth(store, token),
 		BalanceKeeper:  balance.NewBalance(store),
-		OrderInterface: order.NewOrder(store),
+		OrderInterface: order.NewOrder(store, accuralSystemAddress),
 		TokenInterface: token,
 	}
 }

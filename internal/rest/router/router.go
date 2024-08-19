@@ -9,7 +9,7 @@ import (
 	"net/http"
 )
 
-func NewRouterWithMiddleware(endpoints *endpoints.Endpoints, services *internal.ServiceInterface) http.Handler {
+func NewRouterWithMiddleware(endpoints *endpoints.Endpoints, services *internal.Service) http.Handler {
 	//router := NewRouter(endpoints)
 
 	r := chi.NewRouter()
@@ -25,8 +25,8 @@ func NewRouterWithMiddleware(endpoints *endpoints.Endpoints, services *internal.
 			r.Get("/withdrawals", endpoints.GetWithdrawals)
 
 			r.Route("/orders", func(r chi.Router) {
-				// add orders router
 				r.Get("/", endpoints.GetOrders)
+				r.Post("/", endpoints.UploadOrder)
 			})
 
 			r.Route("/balance", func(r chi.Router) {

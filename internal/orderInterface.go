@@ -7,8 +7,8 @@ import (
 
 // OrderInterface - operates with user`s orders
 type OrderInterface interface {
-	// UploadOrder - upload new order into service
-	UploadOrder(ctx context.Context, userId int, order *orders.Order) error
+	// UploadOrder - upload new order into service, returns status code if error is nil
+	UploadOrder(ctx context.Context, userId int, order string) (int, error)
 	// GetOrders - gets orders of current user. Returns slice of orders and error
 	GetOrders(ctx context.Context, userId int) ([]*orders.Order, error)
 }

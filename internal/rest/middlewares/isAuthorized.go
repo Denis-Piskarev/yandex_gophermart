@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func IsAuthorized(services *internal.ServiceInterface) func(http.Handler) http.Handler {
+func IsAuthorized(services *internal.Service) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			token, err := r.Cookie("gopherToken")

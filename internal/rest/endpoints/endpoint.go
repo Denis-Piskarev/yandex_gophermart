@@ -8,10 +8,10 @@ import (
 )
 
 type Endpoints struct {
-	services *internal.ServiceInterface
+	services *internal.Service
 }
 
-func NewEndpoints(services *internal.ServiceInterface) *Endpoints {
+func NewEndpoints(services *internal.Service) *Endpoints {
 	return &Endpoints{
 		services: services,
 	}

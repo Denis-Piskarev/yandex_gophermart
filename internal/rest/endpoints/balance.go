@@ -5,6 +5,7 @@ import (
 	"net/http"
 )
 
+// GetBalance - gets balance of user
 func (e *Endpoints) GetBalance(w http.ResponseWriter, r *http.Request) {
 	userId, err := getUserIdFromHeader(r)
 	if err != nil {

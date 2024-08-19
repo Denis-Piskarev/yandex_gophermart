@@ -1,7 +1,7 @@
 package internal
 
-// ServiceInterface - интерфейс слоя service
-type ServiceInterface struct {
+// Service - struct of service layer interfaces
+type Service struct {
 	BalanceKeeper
 	AuthInterface
 	OrderInterface

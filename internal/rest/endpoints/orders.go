@@ -2,9 +2,48 @@ package endpoints
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
+
+	"github.com/DenisquaP/yandex_gophermart/internal/logger"
+	"github.com/DenisquaP/yandex_gophermart/internal/models/customErrors"
 )
 
+// UploadOrder - uploads order to system
+func (e *Endpoints) UploadOrder(w http.ResponseWriter, r *http.Request) {
+	userId, err := getUserIdFromHeader(r)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+
+		return
+	}
+
+	var order string
+	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
+		logger.Logger.Errorw("error unmarshalling request", "error", err)
+
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	statusCode, err := e.services.UploadOrder(r.Context(), userId, order)
+	if err != nil {
+		var cErr customErrors.CustomError
+		// if we got custom err then set status code from err
+		if errors.As(err, &cErr) {
+			http.Error(w, cErr.Error(), cErr.StatusCode)
+
+			return
+		}
+
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(statusCode)
+}
+
+// GetOrders - gets order info
 func (e *Endpoints) GetOrders(w http.ResponseWriter, r *http.Request) {
 	userId, err := getUserIdFromHeader(r)
 	if err != nil {
