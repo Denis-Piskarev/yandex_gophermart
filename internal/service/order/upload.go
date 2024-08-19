@@ -53,9 +53,13 @@ func (o *Order) UploadOrder(ctx context.Context, userId int, order string) (int,
 		for err != nil {
 			// if to many requests > trying to send request every second
 			_, statusCode, err = sendRequest(order)
+			if statusCode != http.StatusTooManyRequests {
+				return 0, err
+			}
+
 			t := time.After(time.Second)
 
-			_ = <-t
+			<-t
 		}
 	}
 
@@ -96,13 +100,13 @@ func sendRequest(order string) (modelsOrder.Order, int, error) {
 
 // Use for update order`s status code in database
 func (o *Order) updateStatusInDB(ctx context.Context, order string) {
-	var lastUpdate string
+	var lastUpdateStatus string
 
 	// until status != PROCESSED or INVALID
-	for lastUpdate != models.PROCESSED {
+	for lastUpdateStatus != models.PROCESSED {
 		// wait for 5 seconds for another try
 		t := time.After(5 * time.Second)
-		_ = <-t
+		<-t
 
 		orderStruct, statusCode, err := sendRequest(order)
 		// if status code not StatusTooManyRequests returning error
@@ -113,9 +117,12 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 		// if to many requests > trying to send request every second
 		for err != nil {
 			_, statusCode, err = sendRequest(order)
+			if statusCode != http.StatusTooManyRequests {
+				return
+			}
 			t := time.After(time.Second)
 
-			_ = <-t
+			<-t
 		}
 
 		// updating status of order
@@ -126,8 +133,6 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 		if orderStruct.Status == models.INVALID {
 			return
 		}
-		lastUpdate = orderStruct.Status
+		lastUpdateStatus = orderStruct.Status
 	}
-
-	return
 }

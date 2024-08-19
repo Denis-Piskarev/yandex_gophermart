@@ -15,7 +15,7 @@ func NewRouterWithMiddleware(endpoints *endpoints.Endpoints, services *internal.
 	r := chi.NewRouter()
 	r.Use(middleware.Logger) // middleware to logging request
 
-	r.Route("/user", func(r chi.Router) {
+	r.Route("api/user", func(r chi.Router) {
 		r.Post("/register", endpoints.RegisterUser)
 		r.Post("/login", endpoints.LoginUser)
 
