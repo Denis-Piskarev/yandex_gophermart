@@ -1,9 +1,11 @@
 package order
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"time"
@@ -44,7 +46,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, er
 		return 0, cErr
 	}
 
-	orderSt, statusCode, err := sendRequest(order)
+	orderSt, statusCode, err := sendRequest(true, order)
 	if err != nil {
 		if statusCode != http.StatusTooManyRequests {
 			return 0, err
@@ -55,7 +57,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, er
 			<-t
 
 			// if to many requests > trying to send request every second
-			_, statusCode, err = sendRequest(order)
+			_, statusCode, err = sendRequest(false, order)
 			if statusCode != http.StatusTooManyRequests {
 				return 0, err
 			}
@@ -71,8 +73,14 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, er
 	return http.StatusAccepted, nil
 }
 
-// Sends request to accural system
-func sendRequest(order int) (modelsOrder.OrderAccrual, int, error) {
+// Sends request to accrual system
+func sendRequest(first bool, order int) (modelsOrder.OrderAccrual, int, error) {
+	if first {
+		if err := registerInSystem(order); err != nil {
+			return modelsOrder.OrderAccrual{}, 0, err
+		}
+	}
+
 	client := http.Client{Timeout: 5 * time.Second}
 	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, fmt.Sprintf("%s/api/orders/%d", accuralURL, order), nil)
 	if err != nil {
@@ -116,7 +124,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order int) {
 		t := time.After(5 * time.Second)
 		<-t
 
-		orderStruct, statusCode, err := sendRequest(order)
+		orderStruct, statusCode, err := sendRequest(false, order)
 		// if status code not StatusTooManyRequests returning error
 		if statusCode != http.StatusTooManyRequests {
 			return
@@ -124,7 +132,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order int) {
 
 		// if to many requests > trying to send request every second
 		for err != nil {
-			_, statusCode, err = sendRequest(order)
+			_, statusCode, err = sendRequest(false, order)
 			if statusCode != http.StatusTooManyRequests {
 				return
 			}
@@ -143,4 +151,95 @@ func (o *Order) updateStatusInDB(ctx context.Context, order int) {
 		}
 		lastUpdateStatus = orderStruct.Status
 	}
+}
+
+func registerInSystem(order int) error {
+	newName := fmt.Sprintf("%d", rand.Intn(1000000000))
+
+	client := http.Client{Timeout: 5 * time.Second}
+	body1 := struct {
+		Match      string `json:"match"`
+		Reward     int    `json:"reward"`
+		RewardType string `json:"reward_type"`
+	}{
+		Match:      newName,
+		Reward:     10,
+		RewardType: "%",
+	}
+	jBody1, err := json.Marshal(body1)
+	if err != nil {
+		logger.Logger.Errorw("error marshalling json", "error", err)
+
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/goods", accuralURL), bytes.NewBuffer(jBody1))
+	if err != nil {
+		logger.Logger.Errorw("error request to accrual system", "error", err)
+
+		return err
+	}
+	req.Header.Set("Content-Type", "application/json")
+
+	resp, err := client.Do(req)
+	if err != nil {
+		logger.Logger.Errorw("error request to accrual system register order", "error", err)
+
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		logger.Logger.Errorw("not expected status code")
+
+		return fmt.Errorf("not expected status code: %d", resp.StatusCode)
+	}
+
+	type goods struct {
+		Description string `json:"description"`
+		Price       int    `json:"price"`
+	}
+
+	body2 := struct {
+		Order string  `json:"order"`
+		Goods []goods `json:"goods"`
+	}{
+		Order: fmt.Sprintf("%d", order),
+		Goods: []goods{
+			{
+				Description: newName + "saw",
+				Price:       rand.Intn(10000),
+			},
+		},
+	}
+	jBody2, err := json.Marshal(body2)
+	if err != nil {
+		logger.Logger.Errorw("error marshalling json", "error", err)
+
+		return err
+	}
+
+	req2, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/orders", accuralURL), bytes.NewBuffer(jBody2))
+	if err != nil {
+		logger.Logger.Errorw("error request to accrual system", "error", err)
+
+		return err
+	}
+	req2.Header.Set("Content-Type", "application/json")
+
+	resp2, err := client.Do(req2)
+	if err != nil {
+		logger.Logger.Errorw("error request to accrual system register order", "error", err)
+
+		return err
+	}
+	defer resp2.Body.Close()
+
+	if resp2.StatusCode != http.StatusAccepted {
+		logger.Logger.Errorw("not expected status code")
+
+		return fmt.Errorf("not expected status code 2: %d", resp2.StatusCode)
+	}
+
+	return nil
 }
