@@ -16,5 +16,5 @@ type AuthInterface interface {
 	// GetWithdrawals - gets withdrawals of user. Returns custom error from models if user has no withdrawals
 	GetWithdrawals(ctx context.Context, userID int) ([]*modelsUser.Withdrawals, error)
 	// Withdraw - withdraws balance of user
-	Withdraw(ctx context.Context, userId, sum int, order string) error
+	Withdraw(ctx context.Context, userID, sum int, order string) error
 }

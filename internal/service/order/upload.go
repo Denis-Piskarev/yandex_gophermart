@@ -74,7 +74,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, er
 // Sends request to accural system
 func sendRequest(order int) (modelsOrder.OrderAccrual, int, error) {
 	client := http.Client{Timeout: 5 * time.Second}
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, fmt.Sprintf("http://%s/api/orders/%d", accuralURL, order), nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, fmt.Sprintf("%s/api/orders/%d", accuralURL, order), nil)
 	if err != nil {
 		return modelsOrder.OrderAccrual{}, http.StatusInternalServerError, err
 	}
