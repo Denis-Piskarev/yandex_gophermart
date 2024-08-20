@@ -96,30 +96,14 @@ func sendRequest(order int) (modelsOrder.OrderAccrual, int, error) {
 		return modelsOrder.OrderAccrual{}, http.StatusNoContent, cErr
 	}
 
-	var res struct {
-		Order   string  `json:"order"`
-		Status  string  `json:"status"`
-		Accrual float32 `json:"accrual"`
-	}
-
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+	var orderStruct modelsOrder.OrderAccrual
+	if err := json.NewDecoder(resp.Body).Decode(&orderStruct); err != nil {
 		logger.Logger.Errorw("error unmarshalling json", "error", err)
 
 		return modelsOrder.OrderAccrual{}, 0, err
 	}
 
-	orderInt, err := strconv.Atoi(res.Order)
-	if err != nil {
-		logger.Logger.Errorw("error converting order to int", "error", err)
-
-		return modelsOrder.OrderAccrual{}, 0, err
-	}
-
-	return modelsOrder.OrderAccrual{
-		Order:   orderInt,
-		Status:  res.Status,
-		Accrual: res.Accrual,
-	}, resp.StatusCode, nil
+	return orderStruct, resp.StatusCode, nil
 }
 
 // Use for update order`s status code in database
