@@ -10,8 +10,6 @@ import (
 )
 
 func NewRouterWithMiddleware(endpoints *endpoints.Endpoints, services *internal.Service) http.Handler {
-	//router := NewRouter(endpoints)
-
 	r := chi.NewRouter()
 	r.Use(middleware.Logger) // middleware to logging request
 

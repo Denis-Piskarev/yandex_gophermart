@@ -45,7 +45,7 @@ func (e *Endpoints) UploadOrder(w http.ResponseWriter, r *http.Request) {
 
 // GetOrders - gets order info
 func (e *Endpoints) GetOrders(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json")
+	w.Header().Add("Content-Type", "application/json")
 
 	userID, err := getuserIDFromHeader(r)
 	if err != nil {
