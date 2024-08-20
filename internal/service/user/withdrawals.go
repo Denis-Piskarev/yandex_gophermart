@@ -28,12 +28,12 @@ func (u *User) Withdraw(ctx context.Context, userID int, sum float32, order stri
 		return err
 	}
 
-	if userIDOrder != userID {
-		logger.Logger.Errorw("user id not match")
-		cErr := customerrors.NewCustomError("user id not match", http.StatusUnprocessableEntity)
+	//if userIDOrder != userID {
+	//	logger.Logger.Errorw("user id not match")
+	//	cErr := customerrors.NewCustomError("user id not match", http.StatusUnprocessableEntity)
+	//
+	//	return cErr
+	//}
 
-		return cErr
-	}
-
-	return u.db.Withdraw(ctx, userID, sum, orderInt)
+	return u.db.Withdraw(ctx, userIDOrder, sum, orderInt)
 }
