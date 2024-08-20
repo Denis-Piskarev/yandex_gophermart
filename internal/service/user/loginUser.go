@@ -2,23 +2,24 @@ package user
 
 import (
 	"context"
-	"github.com/DenisquaP/yandex_gophermart/internal/logger"
-	"github.com/DenisquaP/yandex_gophermart/internal/models/customErrors"
 	"net/http"
+
+	"github.com/DenisquaP/yandex_gophermart/internal/logger"
+	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
 )
 
 func (u *User) LoginUser(ctx context.Context, username, password string) (string, error) {
 	// generating hash from password
 	hashPassword := u.GetHashedPassword(password)
 
-	userId, err := u.db.Login(ctx, username, hashPassword)
+	userID, err := u.db.Login(ctx, username, hashPassword)
 	if err != nil {
 		return "", err
 	}
 
-	// if userId == 0 => user not exists
-	if userId == 0 {
-		err := customErrors.CustomError{
+	// if userID == 0 => user not exists
+	if userID == 0 {
+		err := customerrors.CustomError{
 			Err:        "user not found",
 			StatusCode: http.StatusUnauthorized,
 		}
@@ -29,7 +30,7 @@ func (u *User) LoginUser(ctx context.Context, username, password string) (string
 	}
 
 	// generating token
-	token, err := u.token.GenerateToken(userId)
+	token, err := u.token.GenerateToken(userID)
 
 	return token, err
 }

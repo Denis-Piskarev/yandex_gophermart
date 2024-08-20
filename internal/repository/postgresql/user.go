@@ -1,4 +1,4 @@
-package PostgreSQL
+package postgresql
 
 import (
 	"context"
@@ -6,9 +6,8 @@ import (
 	"net/http"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
-	"github.com/DenisquaP/yandex_gophermart/internal/models/customErrors"
+	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
 	modelsUser "github.com/DenisquaP/yandex_gophermart/internal/models/users"
-
 	"github.com/jackc/pgx/v5"
 )
 
@@ -38,11 +37,11 @@ func (r *Repository) Login(ctx context.Context, login, password string) (int, er
 	return id, nil
 }
 
-func (r *Repository) GetWithdrawals(ctx context.Context, userId int) ([]*modelsUser.Withdrawals, error) {
+func (r *Repository) GetWithdrawals(ctx context.Context, userID int) ([]*modelsUser.Withdrawals, error) {
 	var withdrawals []*modelsUser.Withdrawals
 
 	query := `SELECT number, sum, processed_at FROM withdrawals WHERE user_id=$1`
-	rows, err := r.db.Query(ctx, query, userId)
+	rows, err := r.db.Query(ctx, query, userID)
 	if err != nil {
 		logger.Logger.Errorw("error getting withdrawals", "error", err)
 
@@ -63,7 +62,7 @@ func (r *Repository) GetWithdrawals(ctx context.Context, userId int) ([]*modelsU
 
 	// if user has no withdrawals return custom error with status code
 	if len(withdrawals) == 0 {
-		cErr := customErrors.NewCustomError("user has no withdrawals", http.StatusNoContent)
+		cErr := customerrors.NewCustomError("user has no withdrawals", http.StatusNoContent)
 
 		return nil, cErr
 	}
@@ -72,9 +71,9 @@ func (r *Repository) GetWithdrawals(ctx context.Context, userId int) ([]*modelsU
 }
 
 func (r *Repository) CheckLogin(ctx context.Context, login string) error {
-	var userId int
+	var userID int
 
-	if err := r.db.QueryRow(ctx, `SELECT id FROM users WHERE login=$1`, login).Scan(&userId); err != nil {
+	if err := r.db.QueryRow(ctx, `SELECT id FROM users WHERE login=$1`, login).Scan(&userID); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return nil
 		}
@@ -84,8 +83,8 @@ func (r *Repository) CheckLogin(ctx context.Context, login string) error {
 		return err
 	}
 
-	if userId != 0 {
-		err := customErrors.CustomError{
+	if userID != 0 {
+		err := customerrors.CustomError{
 			Err:        "user already exists",
 			StatusCode: http.StatusConflict,
 		}

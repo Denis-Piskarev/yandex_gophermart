@@ -1,4 +1,4 @@
-package PostgreSQL
+package postgresql
 
 import (
 	"github.com/jackc/pgx/v5"

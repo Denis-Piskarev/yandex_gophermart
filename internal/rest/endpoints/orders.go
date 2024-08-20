@@ -6,12 +6,12 @@ import (
 	"net/http"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
-	"github.com/DenisquaP/yandex_gophermart/internal/models/customErrors"
+	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
 )
 
 // UploadOrder - uploads order to system
 func (e *Endpoints) UploadOrder(w http.ResponseWriter, r *http.Request) {
-	userId, err := getUserIdFromHeader(r)
+	userID, err := getuserIDFromHeader(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
@@ -26,9 +26,9 @@ func (e *Endpoints) UploadOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statusCode, err := e.services.UploadOrder(r.Context(), userId, order)
+	statusCode, err := e.services.UploadOrder(r.Context(), userID, order)
 	if err != nil {
-		var cErr customErrors.CustomError
+		var cErr customerrors.CustomError
 		// if we got custom err then set status code from err
 		if errors.As(err, &cErr) {
 			http.Error(w, cErr.Error(), cErr.StatusCode)
@@ -45,14 +45,14 @@ func (e *Endpoints) UploadOrder(w http.ResponseWriter, r *http.Request) {
 
 // GetOrders - gets order info
 func (e *Endpoints) GetOrders(w http.ResponseWriter, r *http.Request) {
-	userId, err := getUserIdFromHeader(r)
+	userID, err := getuserIDFromHeader(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
 		return
 	}
 
-	orders, err := e.services.GetOrders(r.Context(), userId)
+	orders, err := e.services.GetOrders(r.Context(), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 

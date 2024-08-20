@@ -18,14 +18,14 @@ func IsAuthorized(services *internal.Service) func(http.Handler) http.Handler {
 				return
 			}
 
-			userId, err := services.ParseToken(token.Value)
-			if err != nil || userId == 0 {
+			userID, err := services.ParseToken(token.Value)
+			if err != nil || userID == 0 {
 				w.WriteHeader(http.StatusUnauthorized)
 
 				return
 			}
 
-			r.Header.Set("userId", strconv.Itoa(userId))
+			r.Header.Set("userID", strconv.Itoa(userID))
 
 			next.ServeHTTP(w, r)
 		})

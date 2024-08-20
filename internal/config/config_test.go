@@ -21,7 +21,7 @@ func TestNewConfigWithEnvValues(t *testing.T) {
 
 	// Checking values
 	require.Equal(t, "localhost:12323", config.RunAddress)
-	require.Equal(t, "postgres", config.DatabaseUri)
+	require.Equal(t, "postgres", config.DatabaseURI)
 	require.Equal(t, "localhost:2222", config.AccuralSystemAddress)
 }
 
@@ -35,7 +35,7 @@ func TestNewConfigDefault(t *testing.T) {
 
 	// Checking values
 	require.Equal(t, "localhost:8080", config.RunAddress)
-	require.Equal(t, "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", config.DatabaseUri)
+	require.Equal(t, "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", config.DatabaseURI)
 	require.Equal(t, "", config.AccuralSystemAddress)
 }
 

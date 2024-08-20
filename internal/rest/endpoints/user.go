@@ -3,10 +3,10 @@ package endpoints
 import (
 	"encoding/json"
 	"errors"
-	"github.com/DenisquaP/yandex_gophermart/internal/models/customErrors"
 	"net/http"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
+	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
 	userModels "github.com/DenisquaP/yandex_gophermart/internal/models/users"
 )
 
@@ -38,7 +38,7 @@ func (e *Endpoints) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// If we can convert error to custom error
 		// We paste status code from custom error
-		var cErr customErrors.CustomError
+		var cErr customerrors.CustomError
 		if errors.As(err, &cErr) {
 			http.Error(w, cErr.Error(), cErr.StatusCode)
 
@@ -84,7 +84,7 @@ func (e *Endpoints) LoginUser(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		// If we can convert error to custom error
 		// We paste status code from custom error
-		var cErr customErrors.CustomError
+		var cErr customerrors.CustomError
 		if errors.As(err, &cErr) {
 			http.Error(w, cErr.Error(), cErr.StatusCode)
 
@@ -103,16 +103,16 @@ func (e *Endpoints) LoginUser(w http.ResponseWriter, r *http.Request) {
 
 // GetWithdrawals - gets user`s withdrawals
 func (e *Endpoints) GetWithdrawals(w http.ResponseWriter, r *http.Request) {
-	userId, err := getUserIdFromHeader(r)
+	userID, err := getuserIDFromHeader(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
 		return
 	}
 
-	withdrawals, err := e.services.GetWithdrawals(r.Context(), userId)
+	withdrawals, err := e.services.GetWithdrawals(r.Context(), userID)
 	if err != nil {
-		var cErr customErrors.CustomError
+		var cErr customerrors.CustomError
 		// if we got custom err then set status code from err
 		if errors.As(err, &cErr) {
 			http.Error(w, cErr.Error(), cErr.StatusCode)

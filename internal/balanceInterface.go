@@ -9,7 +9,7 @@ import (
 // BalanceKeeper - operate with orders
 type BalanceKeeper interface {
 	// GetBalance - gets balance of user
-	GetBalance(ctx context.Context, userId int) (modelsBalance.Balance, error)
+	GetBalance(ctx context.Context, userID int) (modelsBalance.Balance, error)
 	// WithdrawBalance -
-	WithdrawBalance(ctx context.Context, userId int, amount float64) error
+	WithdrawBalance(ctx context.Context, userID int, amount float64) error
 }

@@ -5,6 +5,6 @@ import (
 	modelsUser "github.com/DenisquaP/yandex_gophermart/internal/models/users"
 )
 
-func (u *User) GetWithdrawals(ctx context.Context, userId int) ([]*modelsUser.Withdrawals, error) {
-	return u.db.GetWithdrawals(ctx, userId)
+func (u *User) GetWithdrawals(ctx context.Context, userID int) ([]*modelsUser.Withdrawals, error) {
+	return u.db.GetWithdrawals(ctx, userID)
 }

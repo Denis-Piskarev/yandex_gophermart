@@ -1,45 +1,46 @@
-package PostgreSQL
+package postgresql
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
+
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 	modelsOrder "github.com/DenisquaP/yandex_gophermart/internal/models/orders"
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *Repository) UploadOrder(ctx context.Context, userId int, order *modelsOrder.Order) error {
+func (r *Repository) UploadOrder(ctx context.Context, userID int, order *modelsOrder.Order) error {
 	return nil
 }
 
-func (r *Repository) GetOrder(ctx context.Context, order string) (userId int, err error) {
+func (r *Repository) GetOrder(ctx context.Context, order string) (userID int, err error) {
 	query := `SELECT user_id FROM orders WHERE number = $1`
 
-	if err := r.db.QueryRow(ctx, query, order).Scan(&userId); err != nil {
+	if err := r.db.QueryRow(ctx, query, order).Scan(&userID); err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
 			return 0, nil
 		}
 
-		logger.Logger.Errorw("error in getting orders", "userId", userId, "err", err)
+		logger.Logger.Errorw("error in getting orders", "userID", userID, "err", err)
 
 		return 0, err
 	}
 
-	return userId, err
+	return userID, err
 }
 
-func (r *Repository) GetOrders(ctx context.Context, userId int) ([]*modelsOrder.Order, error) {
+func (r *Repository) GetOrders(ctx context.Context, userID int) ([]*modelsOrder.Order, error) {
 	query := `SELECT number, status, accural, uploaded_at FROM orders WHERE user_id = $1`
 	var orders []*modelsOrder.Order
 
 	// use null int because accural can be NULL
 	var accural sql.NullInt64
 
-	rows, err := r.db.Query(ctx, query, userId)
+	rows, err := r.db.Query(ctx, query, userID)
 	if err != nil {
-		logger.Logger.Errorw("error in getting orders", "userId", userId, "err", err)
+		logger.Logger.Errorw("error in getting orders", "userID", userID, "err", err)
 
 		return nil, err
 	}
@@ -48,7 +49,7 @@ func (r *Repository) GetOrders(ctx context.Context, userId int) ([]*modelsOrder.
 	for rows.Next() {
 		var order modelsOrder.Order
 		if err := rows.Scan(&order.Number, &order.Status, &accural, &order.UploadedAt); err != nil {
-			logger.Logger.Errorw("error in getting orders", "userId", userId, "err", err)
+			logger.Logger.Errorw("error in getting orders", "userID", userID, "err", err)
 
 			return nil, err
 		}

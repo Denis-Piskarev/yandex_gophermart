@@ -8,10 +8,10 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-// GenerateToken - generating tokens token by userId. Returning token and error
-func (j *JWT) GenerateToken(userId int) (string, error) {
+// GenerateToken - generating tokens token by userID. Returning token and error
+func (j *JWT) GenerateToken(userID int) (string, error) {
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId": userId,
+		"userID": userID,
 		"exp":    time.Now().Add(time.Hour).Unix(),
 		"iat":    time.Now().Unix(),
 	})

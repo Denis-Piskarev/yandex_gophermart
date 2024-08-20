@@ -4,42 +4,42 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/DenisquaP/yandex_gophermart/internal/models"
-	modelsOrder "github.com/DenisquaP/yandex_gophermart/internal/models/orders"
 	"net/http"
 	"net/url"
 	"time"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
-	"github.com/DenisquaP/yandex_gophermart/internal/models/customErrors"
+	"github.com/DenisquaP/yandex_gophermart/internal/models"
+	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
+	modelsOrder "github.com/DenisquaP/yandex_gophermart/internal/models/orders"
 	"github.com/DenisquaP/yandex_gophermart/internal/service/validation"
 )
 
-func (o *Order) UploadOrder(ctx context.Context, userId int, order string) (int, error) {
-	userIdOrder, err := o.db.GetOrder(ctx, order)
+func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int, error) {
+	userIDOrder, err := o.db.GetOrder(ctx, order)
 	if err != nil {
 		return 0, err
 	}
 
-	if userIdOrder != 0 {
+	if userIDOrder != 0 {
 		// check if user uploaded by other user
-		if userIdOrder != userId {
-			logger.Logger.Errorw("project does not belong to user", "userId", userId, "order", order)
-			cErr := customErrors.NewCustomError("project does not belong to user", http.StatusConflict)
+		if userIDOrder != userID {
+			logger.Logger.Errorw("project does not belong to user", "userID", userID, "order", order)
+			cErr := customerrors.NewCustomError("project does not belong to user", http.StatusConflict)
 
 			return 0, cErr
 		}
 
 		// check if user already uploaded
-		if userIdOrder == userId {
+		if userIDOrder == userID {
 			return http.StatusOK, nil
 		}
 	}
 
 	// check order for valid
 	if !validation.IsValidLuhnNumber(order) {
-		logger.Logger.Errorw("invalid order number", "userId", userId, "order", order)
-		cErr := customErrors.NewCustomError("invalid order number", http.StatusUnprocessableEntity)
+		logger.Logger.Errorw("invalid order number", "userID", userID, "order", order)
+		cErr := customerrors.NewCustomError("invalid order number", http.StatusUnprocessableEntity)
 
 		return 0, cErr
 	}
@@ -73,7 +73,7 @@ func sendRequest(order string) (modelsOrder.Order, int, error) {
 	client := http.Client{Timeout: 5 * time.Second}
 	req := &http.Request{
 		Method: http.MethodGet,
-		URL:    &url.URL{Path: fmt.Sprintf(`http://%s/api/orders/%s`, accuralUrl, order)},
+		URL:    &url.URL{Path: fmt.Sprintf(`http://%s/api/orders/%s`, accuralURL, order)},
 	}
 
 	resp, err := client.Do(req)

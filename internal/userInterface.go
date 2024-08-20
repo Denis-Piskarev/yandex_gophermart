@@ -14,5 +14,5 @@ type AuthInterface interface {
 	// LoginUser - checks pair login-password. Returns token and error
 	LoginUser(ctx context.Context, username, password string) (string, error)
 	// GetWithdrawals - gets withdrawals of user. Returns custom error from models if user has no withdrawals
-	GetWithdrawals(ctx context.Context, userId int) ([]*modelsUser.Withdrawals, error)
+	GetWithdrawals(ctx context.Context, userID int) ([]*modelsUser.Withdrawals, error)
 }

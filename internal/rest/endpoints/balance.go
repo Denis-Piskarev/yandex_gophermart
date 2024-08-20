@@ -7,14 +7,14 @@ import (
 
 // GetBalance - gets balance of user
 func (e *Endpoints) GetBalance(w http.ResponseWriter, r *http.Request) {
-	userId, err := getUserIdFromHeader(r)
+	userID, err := getuserIDFromHeader(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
 		return
 	}
 
-	balance, err := e.services.GetBalance(r.Context(), userId)
+	balance, err := e.services.GetBalance(r.Context(), userID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 

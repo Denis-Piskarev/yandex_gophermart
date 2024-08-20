@@ -17,15 +17,15 @@ func NewEndpoints(services *internal.Service) *Endpoints {
 	}
 }
 
-func getUserIdFromHeader(r *http.Request) (int, error) {
-	userIdStr := r.Header.Get("userId")
+func getuserIDFromHeader(r *http.Request) (int, error) {
+	userIDStr := r.Header.Get("userID")
 
-	userId, err := strconv.Atoi(userIdStr)
+	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
 		logger.Logger.Errorw("error while converting user id to int", "err", err)
 
 		return 0, err
 	}
 
-	return userId, nil
+	return userID, nil
 }
