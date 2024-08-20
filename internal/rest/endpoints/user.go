@@ -52,6 +52,7 @@ func (e *Endpoints) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:  "gopherToken",
 		Value: token,
+		Path:  "/",
 	})
 }
 
@@ -96,6 +97,7 @@ func (e *Endpoints) LoginUser(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:  "gopherToken",
 		Value: token,
+		Path:  "/",
 	})
 }
 
