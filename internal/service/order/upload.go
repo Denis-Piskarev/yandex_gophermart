@@ -44,23 +44,26 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, er
 		return 0, cErr
 	}
 
-	_, statusCode, err := sendRequest(order)
+	orderSt, statusCode, err := sendRequest(order)
 	if err != nil {
 		if statusCode != http.StatusTooManyRequests {
 			return 0, err
 		}
 
 		for err != nil {
+			t := time.After(time.Second)
+			<-t
+
 			// if to many requests > trying to send request every second
 			_, statusCode, err = sendRequest(order)
 			if statusCode != http.StatusTooManyRequests {
 				return 0, err
 			}
-
-			t := time.After(time.Second)
-
-			<-t
 		}
+	}
+
+	if err := o.db.UploadOrder(ctx, userID, &orderSt); err != nil {
+		return 0, err
 	}
 
 	go o.updateStatusInDB(context.Background(), order)

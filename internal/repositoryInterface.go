@@ -16,7 +16,7 @@ type DBStore interface {
 	// Login - login registered user
 	Login(ctx context.Context, login, password string) (int, error)
 	// UploadOrder - upload new order into service
-	UploadOrder(ctx context.Context, userID int, order *orders.Order) error
+	UploadOrder(ctx context.Context, userID int, order *orders.OrderAccrual) error
 	// GetOrders - gets orders of current user. Returns slice of orders and error
 	GetOrders(ctx context.Context, userID int) ([]*orders.Order, error)
 	// UpdateStatus - updates status of order
@@ -27,4 +27,6 @@ type DBStore interface {
 	GetWithdrawals(ctx context.Context, userID int) ([]*modelsUser.Withdrawals, error)
 	// GetOrder - gets userID and order if order exists
 	GetOrder(ctx context.Context, order int) (userID int, err error)
+	// Withdraw - withdraws balance of user
+	Withdraw(ctx context.Context, userId, sum int, order int) error
 }

@@ -25,7 +25,7 @@ func upInitMigration(ctx context.Context, tx *sql.Tx) error {
 		    id SERIAL,
 		    number BIGINT NOT NULL,
 		    status varchar(255) NOT NULL,
-		    accural INT,
+		    accrual INT,
 		    uploaded_at timestamptz NOT NULL default now(),
 		    user_id INT NOT NULL
 		);

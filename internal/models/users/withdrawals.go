@@ -3,7 +3,11 @@ package users
 import "time"
 
 type Withdrawals struct {
-	Order       int       `json:"order"`
-	Sum         int       `json:"sum"`
+	Withdrawal
 	ProcessedAt time.Time `json:"processedAt"`
+}
+
+type Withdrawal struct {
+	Order string `json:"order"`
+	Sum   int    `json:"sum"`
 }

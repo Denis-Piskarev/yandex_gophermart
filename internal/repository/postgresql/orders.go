@@ -5,13 +5,36 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strconv"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 	modelsOrder "github.com/DenisquaP/yandex_gophermart/internal/models/orders"
 	"github.com/jackc/pgx/v5"
 )
 
-func (r *Repository) UploadOrder(ctx context.Context, userID int, order *modelsOrder.Order) error {
+func (r *Repository) UploadOrder(ctx context.Context, userID int, order *modelsOrder.OrderAccrual) error {
+	query := `INSERT INTO orders (number, status, accrual, user_id) VALUES ($1, $2, $3, $4)`
+
+	orderInt, err := strconv.Atoi(order.Order)
+	if err != nil {
+		logger.Logger.Errorw("error converting order to integer", "error", err)
+
+		return err
+	}
+
+	result, err := r.db.Exec(ctx, query, orderInt, order.Status, order.Accrual, userID)
+	if err != nil {
+		logger.Logger.Errorw("error inserting order", "error", err)
+
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		logger.Logger.Errorw("error inserting order", "error", "no rows inserted")
+
+		return fmt.Errorf("no rows inserted")
+	}
+
 	return nil
 }
 
@@ -32,7 +55,7 @@ func (r *Repository) GetOrder(ctx context.Context, order int) (userID int, err e
 }
 
 func (r *Repository) GetOrders(ctx context.Context, userID int) ([]*modelsOrder.Order, error) {
-	query := `SELECT number, status, accural, uploaded_at FROM orders WHERE user_id = $1`
+	query := `SELECT number, status, accrual, uploaded_at FROM orders WHERE user_id = $1`
 	var orders []*modelsOrder.Order
 
 	// use null int because accrual can be NULL
