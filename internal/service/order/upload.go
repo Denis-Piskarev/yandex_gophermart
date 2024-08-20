@@ -68,7 +68,10 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, er
 		return 0, err
 	}
 
-	go o.updateStatusInDB(context.Background(), order)
+	// if order is not processed starting goroutine to check and update it
+	if orderSt.Status != models.PROCESSED {
+		go o.updateStatusInDB(context.Background(), order)
+	}
 
 	return http.StatusAccepted, nil
 }
@@ -104,14 +107,30 @@ func sendRequest(first bool, order int) (modelsOrder.OrderAccrual, int, error) {
 		return modelsOrder.OrderAccrual{}, http.StatusNoContent, cErr
 	}
 
-	var orderStruct modelsOrder.OrderAccrual
-	if err := json.NewDecoder(resp.Body).Decode(&orderStruct); err != nil {
+	//var orderStruct modelsOrder.OrderAccrual
+	var res struct {
+		Order   string  `json:"order"`
+		Status  string  `json:"status"`
+		Accrual float32 `json:"accrual"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
 		logger.Logger.Errorw("error unmarshalling json", "error", err)
 
 		return modelsOrder.OrderAccrual{}, 0, err
 	}
 
-	return orderStruct, resp.StatusCode, nil
+	orderInt, err := strconv.Atoi(res.Order)
+	if err != nil {
+		logger.Logger.Errorw("error unmarshalling json", "error", err)
+
+		return modelsOrder.OrderAccrual{}, 0, err
+	}
+
+	return modelsOrder.OrderAccrual{
+		Order:   orderInt,
+		Status:  res.Status,
+		Accrual: res.Accrual,
+	}, resp.StatusCode, nil
 }
 
 // Use for update order`s status code in database

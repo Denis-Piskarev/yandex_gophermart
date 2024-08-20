@@ -11,26 +11,45 @@ import (
 )
 
 func (r *Repository) UploadOrder(ctx context.Context, userID int, order *modelsOrder.OrderAccrual) error {
-	query := `INSERT INTO orders (number, status, accrual, user_id) VALUES ($1, $2, $3, $4)`
-
-	//orderInt, err := strconv.Atoi(order.Order)
-	//if err != nil {
-	//	logger.Logger.Errorw("error converting order to integer", "error", err)
-	//
-	//	return err
-	//}
-
-	result, err := r.db.Exec(ctx, query, order.Order, order.Status, order.Accrual, userID)
+	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
+		logger.Logger.Errorw("Error starting transaction", "error", err)
+
+		return err
+	}
+	defer func() {
+		if err != nil {
+			if txErr := tx.Rollback(ctx); txErr != nil {
+				logger.Logger.Errorw("Error rolling back", "error", txErr)
+
+				return
+			}
+		}
+		if err = tx.Commit(ctx); err != nil {
+			logger.Logger.Errorw("Error committing transaction", "error", err)
+
+		}
+	}()
+
+	queryInsert := `INSERT INTO orders (number, status, accrual, user_id) VALUES ($1, $2, $3, $4)`
+	if _, err := tx.Exec(ctx, queryInsert, order.Order, order.Status, order.Accrual, userID); err != nil {
 		logger.Logger.Errorw("error inserting order", "error", err)
 
 		return err
 	}
 
-	if result.RowsAffected() == 0 {
-		logger.Logger.Errorw("error inserting order", "error", "no rows inserted")
+	queryUpdateBalance := `UPDATE users SET current = (SELECT current FROM users WHERE id = $1) + $2 WHERE id = $1`
+	result, err := tx.Exec(ctx, queryUpdateBalance, userID, order.Accrual)
+	if err != nil {
+		logger.Logger.Errorw("error updating balance", "error", err)
 
-		return fmt.Errorf("no rows inserted")
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		logger.Logger.Errorw("no rows affected")
+
+		return errors.New("error updating balance")
 	}
 
 	return nil
