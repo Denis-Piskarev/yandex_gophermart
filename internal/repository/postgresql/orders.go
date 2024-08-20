@@ -5,8 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"strconv"
-
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 	modelsOrder "github.com/DenisquaP/yandex_gophermart/internal/models/orders"
 	"github.com/jackc/pgx/v5"
@@ -15,14 +13,14 @@ import (
 func (r *Repository) UploadOrder(ctx context.Context, userID int, order *modelsOrder.OrderAccrual) error {
 	query := `INSERT INTO orders (number, status, accrual, user_id) VALUES ($1, $2, $3, $4)`
 
-	orderInt, err := strconv.Atoi(order.Order)
-	if err != nil {
-		logger.Logger.Errorw("error converting order to integer", "error", err)
+	//orderInt, err := strconv.Atoi(order.Order)
+	//if err != nil {
+	//	logger.Logger.Errorw("error converting order to integer", "error", err)
+	//
+	//	return err
+	//}
 
-		return err
-	}
-
-	result, err := r.db.Exec(ctx, query, orderInt, order.Status, order.Accrual, userID)
+	result, err := r.db.Exec(ctx, query, order.Order, order.Status, order.Accrual, userID)
 	if err != nil {
 		logger.Logger.Errorw("error inserting order", "error", err)
 
