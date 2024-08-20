@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"net/url"
 	"strconv"
 	"time"
 
@@ -70,18 +69,18 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, er
 }
 
 // Sends request to accural system
-func sendRequest(order int) (modelsOrder.Order, int, error) {
+func sendRequest(order int) (modelsOrder.OrderAccrual, int, error) {
 	client := http.Client{Timeout: 5 * time.Second}
-	req := &http.Request{
-		Method: http.MethodGet,
-		URL:    &url.URL{Path: fmt.Sprintf(`http://%s/api/orders/%d`, accuralURL, order)},
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, fmt.Sprintf("http://%s/api/orders/%d", accuralURL, order), nil)
+	if err != nil {
+		return modelsOrder.OrderAccrual{}, http.StatusInternalServerError, err
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
 		logger.Logger.Errorw("error sending request to accural system", "error", err)
 
-		return modelsOrder.Order{}, 0, err
+		return modelsOrder.OrderAccrual{}, 0, err
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
@@ -89,11 +88,11 @@ func sendRequest(order int) (modelsOrder.Order, int, error) {
 		}
 	}()
 
-	var orderStruct modelsOrder.Order
+	var orderStruct modelsOrder.OrderAccrual
 	if err := json.NewDecoder(resp.Body).Decode(&orderStruct); err != nil {
 		logger.Logger.Errorw("error unmarshalling json", "error", err)
 
-		return modelsOrder.Order{}, 0, err
+		return modelsOrder.OrderAccrual{}, 0, err
 	}
 
 	return orderStruct, resp.StatusCode, nil

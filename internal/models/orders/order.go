@@ -6,6 +6,12 @@ import "time"
 type Order struct {
 	Number     int       `json:"number"`
 	Status     string    `json:"status"`
-	Accural    int       `json:"accural,omitempty"`
+	Accrual    int       `json:"accrual,omitempty"`
 	UploadedAt time.Time `json:"uploadedAt,omitempty"`
+}
+
+type OrderAccrual struct {
+	Order   string `json:"order"`
+	Status  string `json:"status"`
+	Accrual int    `json:"accrual"`
 }

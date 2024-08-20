@@ -35,8 +35,8 @@ func (r *Repository) GetOrders(ctx context.Context, userID int) ([]*modelsOrder.
 	query := `SELECT number, status, accural, uploaded_at FROM orders WHERE user_id = $1`
 	var orders []*modelsOrder.Order
 
-	// use null int because accural can be NULL
-	var accural sql.NullInt64
+	// use null int because accrual can be NULL
+	var accrual sql.NullInt64
 
 	rows, err := r.db.Query(ctx, query, userID)
 	if err != nil {
@@ -48,15 +48,15 @@ func (r *Repository) GetOrders(ctx context.Context, userID int) ([]*modelsOrder.
 
 	for rows.Next() {
 		var order modelsOrder.Order
-		if err := rows.Scan(&order.Number, &order.Status, &accural, &order.UploadedAt); err != nil {
+		if err := rows.Scan(&order.Number, &order.Status, &accrual, &order.UploadedAt); err != nil {
 			logger.Logger.Errorw("error in getting orders", "userID", userID, "err", err)
 
 			return nil, err
 		}
 
-		// check accural for not NULL value
-		if accural.Valid {
-			order.Accural = int(accural.Int64)
+		// check accrual for not NULL value
+		if accrual.Valid {
+			order.Accrual = int(accrual.Int64)
 		}
 
 		orders = append(orders, &order)
