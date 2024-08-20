@@ -8,6 +8,6 @@ type Withdrawals struct {
 }
 
 type Withdrawal struct {
-	Order float64 `json:"order"`
-	Sum   int     `json:"sum"`
+	Order string `json:"order"`
+	Sum   int    `json:"sum"`
 }
