@@ -18,7 +18,7 @@ func (e *Endpoints) UploadOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var order string
+	var order int
 	if err := json.NewDecoder(r.Body).Decode(&order); err != nil {
 		logger.Logger.Errorw("error unmarshalling request", "error", err)
 
@@ -78,4 +78,6 @@ func (e *Endpoints) GetOrders(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+
+	r.Header.Set("content-type", "application/json")
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
@@ -15,7 +16,7 @@ import (
 	"github.com/DenisquaP/yandex_gophermart/internal/service/validation"
 )
 
-func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int, error) {
+func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, error) {
 	userIDOrder, err := o.db.GetOrder(ctx, order)
 	if err != nil {
 		return 0, err
@@ -37,7 +38,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 	}
 
 	// check order for valid
-	if !validation.IsValidLuhnNumber(order) {
+	if !validation.IsValidLuhnNumber(strconv.Itoa(order)) {
 		logger.Logger.Errorw("invalid order number", "userID", userID, "order", order)
 		cErr := customerrors.NewCustomError("invalid order number", http.StatusUnprocessableEntity)
 
@@ -69,11 +70,11 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 }
 
 // Sends request to accural system
-func sendRequest(order string) (modelsOrder.Order, int, error) {
+func sendRequest(order int) (modelsOrder.Order, int, error) {
 	client := http.Client{Timeout: 5 * time.Second}
 	req := &http.Request{
 		Method: http.MethodGet,
-		URL:    &url.URL{Path: fmt.Sprintf(`http://%s/api/orders/%s`, accuralURL, order)},
+		URL:    &url.URL{Path: fmt.Sprintf(`http://%s/api/orders/%d`, accuralURL, order)},
 	}
 
 	resp, err := client.Do(req)
@@ -99,7 +100,7 @@ func sendRequest(order string) (modelsOrder.Order, int, error) {
 }
 
 // Use for update order`s status code in database
-func (o *Order) updateStatusInDB(ctx context.Context, order string) {
+func (o *Order) updateStatusInDB(ctx context.Context, order int) {
 	var lastUpdateStatus string
 
 	// until status != PROCESSED or INVALID
