@@ -59,7 +59,7 @@ func (r *Repository) GetOrders(ctx context.Context, userID int) ([]*modelsOrder.
 	var orders []*modelsOrder.Order
 
 	// use null int because accrual can be NULL
-	var accrual sql.NullInt64
+	var accrual sql.NullFloat64
 
 	rows, err := r.db.Query(ctx, query, userID)
 	if err != nil {
@@ -79,7 +79,7 @@ func (r *Repository) GetOrders(ctx context.Context, userID int) ([]*modelsOrder.
 
 		// check accrual for not NULL value
 		if accrual.Valid {
-			order.Accrual = int(accrual.Int64)
+			order.Accrual = float32(accrual.Float64)
 		}
 
 		orders = append(orders, &order)
