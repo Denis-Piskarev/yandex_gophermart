@@ -91,6 +91,11 @@ func sendRequest(order int) (modelsOrder.OrderAccrual, int, error) {
 		}
 	}()
 
+	if resp.StatusCode == http.StatusNoContent {
+		cErr := customerrors.NewCustomError("no content", http.StatusNoContent)
+		return modelsOrder.OrderAccrual{}, http.StatusNoContent, cErr
+	}
+
 	var orderStruct modelsOrder.OrderAccrual
 	if err := json.NewDecoder(resp.Body).Decode(&orderStruct); err != nil {
 		logger.Logger.Errorw("error unmarshalling json", "error", err)
