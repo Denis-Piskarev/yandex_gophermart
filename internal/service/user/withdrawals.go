@@ -14,7 +14,7 @@ func (u *User) GetWithdrawals(ctx context.Context, userID int) ([]*modelsUser.Wi
 	return u.db.GetWithdrawals(ctx, userID)
 }
 
-func (u *User) Withdraw(ctx context.Context, userID, sum int, order string) error {
+func (u *User) Withdraw(ctx context.Context, userID int, sum float32, order string) error {
 	orderInt, err := strconv.Atoi(order)
 	if err != nil {
 		logger.Logger.Errorw("Error converting order to int", "order", order)

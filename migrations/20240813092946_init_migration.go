@@ -18,14 +18,14 @@ func upInitMigration(ctx context.Context, tx *sql.Tx) error {
 		    login varchar(255) NOT NULL,
 		    password varchar(255) NOT NULL,
 		    current FLOAT DEFAULT 0,
-		    withdrawn INT  DEFAULT 0
+		    withdrawn FLOAT DEFAULT 0
 		);
 
 		CREATE TABLE IF NOT EXISTS orders (
 		    id SERIAL,
 		    number BIGINT NOT NULL,
 		    status varchar(255) NOT NULL,
-		    accrual INT,
+		    accrual FLOAT NOT NULL,
 		    uploaded_at timestamptz NOT NULL default now(),
 		    user_id INT NOT NULL
 		);
@@ -34,7 +34,7 @@ func upInitMigration(ctx context.Context, tx *sql.Tx) error {
 		    id SERIAL,
 		    user_id INT NOT NULL,
 		    number BIGINT NOT NULL,
-		    sum INT NOT NULL,
+		    sum FLOAT NOT NULL,
 		    processed_at timestamptz NOT NULL default now()
 		)
 	`

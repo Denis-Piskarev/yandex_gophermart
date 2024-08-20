@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func (r *Repository) Withdraw(ctx context.Context, userID, sum int, order int) error {
+func (r *Repository) Withdraw(ctx context.Context, userID int, sum float32, order int) error {
 	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		logger.Logger.Errorw("Error starting transaction", "error", err)
@@ -29,7 +29,7 @@ func (r *Repository) Withdraw(ctx context.Context, userID, sum int, order int) e
 		}
 	}()
 
-	var current int
+	var current float32
 	queryGetCurrent := `SELECT current FROM users WHERE id = $1`
 	if err := tx.QueryRow(ctx, queryGetCurrent, userID).Scan(&current); err != nil {
 		logger.Logger.Errorw("Error getting current balance of user", "userID", userID, "error", err)

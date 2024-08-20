@@ -28,8 +28,8 @@ func NewRouterWithMiddleware(endpoints *endpoints.Endpoints, services *internal.
 			})
 
 			r.Route("/balance", func(r chi.Router) {
-				// add orders router
 				r.Get("/", endpoints.GetBalance)
+				r.Post("/withdraw", endpoints.Withdraw)
 			})
 		})
 	})

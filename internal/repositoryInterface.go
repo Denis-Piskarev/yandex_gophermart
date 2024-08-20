@@ -28,5 +28,5 @@ type DBStore interface {
 	// GetOrder - gets userID and order if order exists
 	GetOrder(ctx context.Context, order int) (userID int, err error)
 	// Withdraw - withdraws balance of user
-	Withdraw(ctx context.Context, userID, sum int, order int) error
+	Withdraw(ctx context.Context, userID int, sum float32, order int) error
 }
