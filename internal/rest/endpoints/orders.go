@@ -65,7 +65,6 @@ func (e *Endpoints) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	response, err := json.Marshal(orders)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -79,5 +78,5 @@ func (e *Endpoints) GetOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	r.Header.Set("content-type", "application/json")
+	r.Header.Set("Content-Type", "application/json")
 }
