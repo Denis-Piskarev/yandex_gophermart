@@ -117,7 +117,7 @@ func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error
 
 	}
 
-	client := http.Client{Timeout: 5 * time.Second}
+	client := http.Client{}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/orders/%s", accuralURL, order), nil)
 	if err != nil {
 		return modelsOrder.OrderAccrual{}, http.StatusInternalServerError, err
@@ -192,7 +192,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 func registerInSystem() (int, error) {
 	newGoods := fmt.Sprintf("%d", rand.Intn(1000000000))
 
-	client := http.Client{Timeout: 5 * time.Second}
+	client := http.Client{}
 	body1 := struct {
 		Match      string `json:"match"`
 		Reward     int    `json:"reward"`
@@ -237,7 +237,7 @@ func registerInSystem() (int, error) {
 func uploadOrderToSystem(order string) (int, error) {
 	newName := fmt.Sprintf("%d", rand.Intn(1000000000))
 
-	client := http.Client{Timeout: 5 * time.Second}
+	client := http.Client{}
 
 	type goods struct {
 		Description string `json:"description"`
