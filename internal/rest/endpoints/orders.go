@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"strconv"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
@@ -26,7 +27,7 @@ func (e *Endpoints) UploadOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	statusCode, err := e.services.UploadOrder(r.Context(), userID, order)
+	statusCode, err := e.services.UploadOrder(r.Context(), userID, strconv.Itoa(order))
 	if err != nil {
 		var cErr customerrors.CustomError
 		// if we got custom err then set status code from err

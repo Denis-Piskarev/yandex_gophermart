@@ -8,7 +8,7 @@ import (
 	"net/http"
 )
 
-func (r *Repository) Withdraw(ctx context.Context, userID int, sum float32, order int) error {
+func (r *Repository) Withdraw(ctx context.Context, userID int, sum float32, order string) error {
 	tx, err := r.db.BeginTx(ctx, pgx.TxOptions{})
 	if err != nil {
 		logger.Logger.Errorw("Error starting transaction", "error", err)

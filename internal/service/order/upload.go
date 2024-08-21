@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
@@ -17,7 +16,7 @@ import (
 	"github.com/DenisquaP/yandex_gophermart/internal/service/validation"
 )
 
-func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, error) {
+func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int, error) {
 	userIDOrder, err := o.db.GetOrder(ctx, order)
 	if err != nil {
 		return 0, err
@@ -39,7 +38,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, er
 	}
 
 	// check order for valid
-	if !validation.IsValidLuhnNumber(strconv.Itoa(order)) {
+	if !validation.IsValidLuhnNumber(order) {
 		logger.Logger.Errorw("invalid order number", "userID", userID, "order", order)
 		cErr := customerrors.NewCustomError("invalid order number", http.StatusUnprocessableEntity)
 
@@ -77,7 +76,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order int) (int, er
 }
 
 // Sends request to accrual system
-func sendRequest(first bool, order int) (modelsOrder.OrderAccrual, int, error) {
+func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error) {
 	if first {
 		if err := registerInSystem(order); err != nil {
 			return modelsOrder.OrderAccrual{}, 0, err
@@ -85,7 +84,7 @@ func sendRequest(first bool, order int) (modelsOrder.OrderAccrual, int, error) {
 	}
 
 	client := http.Client{Timeout: 5 * time.Second}
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, fmt.Sprintf("%s/api/orders/%d", accuralURL, order), nil)
+	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, fmt.Sprintf("%s/api/orders/%s", accuralURL, order), nil)
 	if err != nil {
 		return modelsOrder.OrderAccrual{}, http.StatusInternalServerError, err
 	}
@@ -107,34 +106,18 @@ func sendRequest(first bool, order int) (modelsOrder.OrderAccrual, int, error) {
 		return modelsOrder.OrderAccrual{}, http.StatusNoContent, cErr
 	}
 
-	//var orderStruct modelsOrder.OrderAccrual
-	var res struct {
-		Order   string  `json:"order"`
-		Status  string  `json:"status"`
-		Accrual float32 `json:"accrual"`
-	}
-	if err := json.NewDecoder(resp.Body).Decode(&res); err != nil {
+	var orderStruct modelsOrder.OrderAccrual
+	if err := json.NewDecoder(resp.Body).Decode(&orderStruct); err != nil {
 		logger.Logger.Errorw("error unmarshalling json", "error", err)
 
 		return modelsOrder.OrderAccrual{}, 0, err
 	}
 
-	orderInt, err := strconv.Atoi(res.Order)
-	if err != nil {
-		logger.Logger.Errorw("error unmarshalling json", "error", err)
-
-		return modelsOrder.OrderAccrual{}, 0, err
-	}
-
-	return modelsOrder.OrderAccrual{
-		Order:   orderInt,
-		Status:  res.Status,
-		Accrual: res.Accrual,
-	}, resp.StatusCode, nil
+	return orderStruct, resp.StatusCode, nil
 }
 
 // Use for update order`s status code in database
-func (o *Order) updateStatusInDB(ctx context.Context, order int) {
+func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 	var lastUpdateStatus string
 
 	// until status != PROCESSED or INVALID
@@ -172,7 +155,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order int) {
 	}
 }
 
-func registerInSystem(order int) error {
+func registerInSystem(order string) error {
 	newName := fmt.Sprintf("%d", rand.Intn(1000000000))
 
 	client := http.Client{Timeout: 5 * time.Second}
@@ -223,7 +206,7 @@ func registerInSystem(order int) error {
 		Order string  `json:"order"`
 		Goods []goods `json:"goods"`
 	}{
-		Order: fmt.Sprintf("%d", order),
+		Order: order,
 		Goods: []goods{
 			{
 				Description: newName + "saw",

@@ -55,7 +55,7 @@ func (r *Repository) UploadOrder(ctx context.Context, userID int, order *modelsO
 	return nil
 }
 
-func (r *Repository) GetOrder(ctx context.Context, order int) (userID int, err error) {
+func (r *Repository) GetOrder(ctx context.Context, order string) (userID int, err error) {
 	query := `SELECT user_id FROM orders WHERE number = $1`
 
 	if err := r.db.QueryRow(ctx, query, order).Scan(&userID); err != nil {
@@ -105,7 +105,7 @@ func (r *Repository) GetOrders(ctx context.Context, userID int) ([]*modelsOrder.
 	return orders, nil
 }
 
-func (r *Repository) UpdateStatus(ctx context.Context, order int, status string) error {
+func (r *Repository) UpdateStatus(ctx context.Context, order, status string) error {
 	result, err := r.db.Exec(ctx, `UPDATE orders SET status=$1 WHERE number=$2`, status, order)
 	if err != nil {
 		logger.Logger.Errorw("error updating order status", "error", err)

@@ -20,13 +20,13 @@ type DBStore interface {
 	// GetOrders - gets orders of current user. Returns slice of orders and error
 	GetOrders(ctx context.Context, userID int) ([]*orders.Order, error)
 	// UpdateStatus - updates status of order
-	UpdateStatus(ctx context.Context, order int, status string) error
+	UpdateStatus(ctx context.Context, order string, status string) error
 	// GetBalance - gets balance of current user. If user has no balance - return {0, 0}
 	GetBalance(ctx context.Context, userID int) (modelsBalance.Balance, error)
 	// GetWithdrawals - gets withdrawals of user. Returns custom error from models if user has no withdrawals
 	GetWithdrawals(ctx context.Context, userID int) ([]*modelsUser.Withdrawals, error)
 	// GetOrder - gets userID and order if order exists
-	GetOrder(ctx context.Context, order int) (userID int, err error)
+	GetOrder(ctx context.Context, order string) (userID int, err error)
 	// Withdraw - withdraws balance of user
-	Withdraw(ctx context.Context, userID int, sum float32, order int) error
+	Withdraw(ctx context.Context, userID int, sum float32, order string) error
 }
