@@ -82,16 +82,16 @@ func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error
 	if first {
 		var err error
 
-		codeRegister, err := registerInSystem(order)
+		codeRegister, err := registerInSystem()
 		if !errors.Is(err, fmt.Errorf("not expected status code: %d", http.StatusTooManyRequests)) {
 			return modelsOrder.OrderAccrual{}, codeRegister, err
 		}
 
 		for codeRegister == http.StatusTooManyRequests {
-			t := time.After(time.Second)
+			t := time.After(30 * time.Millisecond)
 			<-t
 
-			codeRegister, err = registerInSystem(order)
+			codeRegister, err = registerInSystem()
 			if err != nil {
 				if codeRegister == http.StatusTooManyRequests {
 					err = nil
@@ -105,7 +105,7 @@ func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error
 		}
 
 		for codeUpload == http.StatusTooManyRequests {
-			t := time.After(time.Second)
+			t := time.After(30 * time.Millisecond)
 			<-t
 			codeUpload, err = uploadOrderToSystem(order)
 			if err != nil {
@@ -125,13 +125,13 @@ func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error
 
 	resp, err := client.Do(req)
 	if err != nil {
-		logger.Logger.Errorw("error sending request to accural system", "error", err)
+		logger.Logger.Errorw("error sending request to accrual system", "error", err)
 
 		return modelsOrder.OrderAccrual{}, 0, err
 	}
 	defer func() {
 		if err := resp.Body.Close(); err != nil {
-			logger.Logger.Errorw("error sending request to accural system", "error", err)
+			logger.Logger.Errorw("error sending request to accrual system", "error", err)
 		}
 	}()
 
@@ -172,7 +172,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 			if statusCode != http.StatusTooManyRequests {
 				return
 			}
-			t := time.After(time.Second)
+			t := time.After(30 * time.Millisecond)
 
 			<-t
 		}
@@ -189,7 +189,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 	}
 }
 
-func registerInSystem(order string) (int, error) {
+func registerInSystem() (int, error) {
 	newGoods := fmt.Sprintf("%d", rand.Intn(1000000000))
 
 	client := http.Client{Timeout: 5 * time.Second}
