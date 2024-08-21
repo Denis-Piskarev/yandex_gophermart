@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -77,10 +78,43 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 
 // Sends request to accrual system
 func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error) {
+	// register order in system
 	if first {
-		if err := registerInSystem(order); err != nil {
-			return modelsOrder.OrderAccrual{}, 0, err
+		var err error
+
+		codeRegister, err := registerInSystem(order)
+		if !errors.Is(err, fmt.Errorf("not expected status code: %d", http.StatusTooManyRequests)) {
+			return modelsOrder.OrderAccrual{}, codeRegister, err
 		}
+
+		for codeRegister == http.StatusTooManyRequests {
+			t := time.After(time.Second)
+			<-t
+
+			codeRegister, err = registerInSystem(order)
+			if err != nil {
+				if codeRegister == http.StatusTooManyRequests {
+					err = nil
+				}
+			}
+		}
+
+		codeUpload, err := uploadOrderToSystem(order)
+		if !errors.Is(err, fmt.Errorf("not expected status code uploading order to system: %d", http.StatusTooManyRequests)) {
+			return modelsOrder.OrderAccrual{}, codeRegister, err
+		}
+
+		for codeUpload == http.StatusTooManyRequests {
+			t := time.After(time.Second)
+			<-t
+			codeUpload, err = uploadOrderToSystem(order)
+			if err != nil {
+				if codeUpload == http.StatusTooManyRequests {
+					err = nil
+				}
+			}
+		}
+
 	}
 
 	client := http.Client{Timeout: 5 * time.Second}
@@ -155,8 +189,8 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 	}
 }
 
-func registerInSystem(order string) error {
-	newName := fmt.Sprintf("%d", rand.Intn(1000000000))
+func registerInSystem(order string) (int, error) {
+	newGoods := fmt.Sprintf("%d", rand.Intn(1000000000))
 
 	client := http.Client{Timeout: 5 * time.Second}
 	body1 := struct {
@@ -164,7 +198,7 @@ func registerInSystem(order string) error {
 		Reward     int    `json:"reward"`
 		RewardType string `json:"reward_type"`
 	}{
-		Match:      newName,
+		Match:      newGoods,
 		Reward:     10,
 		RewardType: "%",
 	}
@@ -172,14 +206,14 @@ func registerInSystem(order string) error {
 	if err != nil {
 		logger.Logger.Errorw("error marshalling json", "error", err)
 
-		return err
+		return 0, err
 	}
 
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/goods", accuralURL), bytes.NewBuffer(jBody1))
 	if err != nil {
 		logger.Logger.Errorw("error request to accrual system", "error", err)
 
-		return err
+		return 0, err
 	}
 	req.Header.Set("Content-Type", "application/json")
 
@@ -187,22 +221,30 @@ func registerInSystem(order string) error {
 	if err != nil {
 		logger.Logger.Errorw("error request to accrual system register order", "error", err)
 
-		return err
+		return 0, err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
 		logger.Logger.Errorw("not expected status code")
 
-		return fmt.Errorf("not expected status code: %d", resp.StatusCode)
+		return resp.StatusCode, fmt.Errorf("not expected status code: %d", resp.StatusCode)
 	}
+
+	return resp.StatusCode, nil
+}
+
+func uploadOrderToSystem(order string) (int, error) {
+	newName := fmt.Sprintf("%d", rand.Intn(1000000000))
+
+	client := http.Client{Timeout: 5 * time.Second}
 
 	type goods struct {
 		Description string `json:"description"`
 		Price       int    `json:"price"`
 	}
 
-	body2 := struct {
+	body := struct {
 		Order string  `json:"order"`
 		Goods []goods `json:"goods"`
 	}{
@@ -214,34 +256,34 @@ func registerInSystem(order string) error {
 			},
 		},
 	}
-	jBody2, err := json.Marshal(body2)
+	jBody, err := json.Marshal(body)
 	if err != nil {
 		logger.Logger.Errorw("error marshalling json", "error", err)
 
-		return err
+		return 0, err
 	}
 
-	req2, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/orders", accuralURL), bytes.NewBuffer(jBody2))
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/orders", accuralURL), bytes.NewBuffer(jBody))
 	if err != nil {
 		logger.Logger.Errorw("error request to accrual system", "error", err)
 
-		return err
+		return 0, err
 	}
-	req2.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Content-Type", "application/json")
 
-	resp2, err := client.Do(req2)
+	resp, err := client.Do(req)
 	if err != nil {
 		logger.Logger.Errorw("error request to accrual system register order", "error", err)
 
-		return err
+		return 0, err
 	}
-	defer resp2.Body.Close()
+	defer resp.Body.Close()
 
-	if resp2.StatusCode != http.StatusAccepted {
+	if resp.StatusCode != http.StatusAccepted {
 		logger.Logger.Errorw("not expected status code")
 
-		return fmt.Errorf("not expected status code 2: %d", resp2.StatusCode)
+		return resp.StatusCode, fmt.Errorf("not expected status code uploading order to system: %d", resp.StatusCode)
 	}
 
-	return nil
+	return resp.StatusCode, nil
 }
