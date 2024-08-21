@@ -49,6 +49,9 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 	orderSt, statusCode, err := sendRequest(true, order)
 	if err != nil {
 		if statusCode != http.StatusTooManyRequests {
+			if statusCode == http.StatusConflict {
+				return 200, nil
+			}
 			return 0, err
 		}
 
