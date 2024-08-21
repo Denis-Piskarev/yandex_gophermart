@@ -118,7 +118,7 @@ func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error
 	}
 
 	client := http.Client{Timeout: 5 * time.Second}
-	req, err := http.NewRequestWithContext(context.TODO(), http.MethodGet, fmt.Sprintf("%s/api/orders/%s", accuralURL, order), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/orders/%s", accuralURL, order), nil)
 	if err != nil {
 		return modelsOrder.OrderAccrual{}, http.StatusInternalServerError, err
 	}
@@ -157,7 +157,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 	// until status != PROCESSED or INVALID
 	for lastUpdateStatus != models.PROCESSED {
 		// wait for 5 seconds for another try
-		t := time.After(5 * time.Second)
+		t := time.After(2 * time.Second)
 		<-t
 
 		orderStruct, statusCode, err := sendRequest(false, order)
