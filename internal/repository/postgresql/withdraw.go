@@ -2,6 +2,7 @@ package postgresql
 
 import (
 	"context"
+	"fmt"
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
 	"github.com/jackc/pgx/v5"
@@ -43,6 +44,20 @@ func (r *Repository) Withdraw(ctx context.Context, userID int, sum float32, orde
 		cErr := customerrors.NewCustomError("not enough balance", http.StatusPaymentRequired)
 
 		return cErr
+	}
+
+	queryUpateCurrent := `UPDATE users SET current = $1 WHERE id = $2`
+	result, err := tx.Exec(ctx, queryUpateCurrent, current-sum, userID)
+	if err != nil {
+		logger.Logger.Errorw("Error updating user balance", "userID", userID, "error", err)
+
+		return err
+	}
+
+	if result.RowsAffected() == 0 {
+		logger.Logger.Errorw("no rows affected", "userID", userID)
+
+		return fmt.Errorf("no rows affected")
 	}
 
 	// adding withdraw to user
