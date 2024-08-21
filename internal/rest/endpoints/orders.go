@@ -37,6 +37,8 @@ func (e *Endpoints) UploadOrder(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		logger.Logger.Errorw("=================================error uploading order", "error", err)
+
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
