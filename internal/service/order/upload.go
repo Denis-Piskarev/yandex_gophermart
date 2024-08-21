@@ -83,7 +83,7 @@ func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error
 		var err error
 
 		codeRegister, err := registerInSystem()
-		if !errors.Is(err, fmt.Errorf("not expected status code: %d", http.StatusTooManyRequests)) {
+		if err != nil && !errors.Is(err, fmt.Errorf("not expected status code: %d", http.StatusTooManyRequests)) {
 			return modelsOrder.OrderAccrual{}, codeRegister, err
 		}
 
@@ -100,7 +100,7 @@ func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error
 		}
 
 		codeUpload, err := uploadOrderToSystem(order)
-		if !errors.Is(err, fmt.Errorf("not expected status code uploading order to system: %d", http.StatusTooManyRequests)) {
+		if err != nil && !errors.Is(err, fmt.Errorf("not expected status code uploading order to system: %d", http.StatusTooManyRequests)) {
 			return modelsOrder.OrderAccrual{}, codeRegister, err
 		}
 
