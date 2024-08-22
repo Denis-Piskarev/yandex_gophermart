@@ -3,13 +3,15 @@ package user
 import (
 	"context"
 	"fmt"
-	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
-	mocks_repo "github.com/DenisquaP/yandex_gophermart/internal/repository/mocks"
-	"github.com/DenisquaP/yandex_gophermart/internal/service/jwt"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"testing"
+
+	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
+	mocksRepo "github.com/DenisquaP/yandex_gophermart/internal/repository/mocks"
+	"github.com/DenisquaP/yandex_gophermart/internal/service/jwt"
+
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/require"
 )
 
 func TestUserAuth_Register(t *testing.T) {
@@ -21,7 +23,7 @@ func TestUserAuth_Register(t *testing.T) {
 
 	ctx := context.Background()
 
-	db := mocks_repo.NewMockDBStore(ctrl)
+	db := mocksRepo.NewMockDBStore(ctrl)
 
 	j := jwt.NewJWT()
 	u := NewUserAuth(db, j)
@@ -44,7 +46,7 @@ func TestUserAuth_Register_LoginOccupied(t *testing.T) {
 
 	ctx := context.Background()
 
-	db := mocks_repo.NewMockDBStore(ctrl)
+	db := mocksRepo.NewMockDBStore(ctrl)
 
 	j := jwt.NewJWT()
 	u := NewUserAuth(db, j)
@@ -66,7 +68,7 @@ func TestUserAuth_Register_ErrorRegister(t *testing.T) {
 
 	ctx := context.Background()
 
-	db := mocks_repo.NewMockDBStore(ctrl)
+	db := mocksRepo.NewMockDBStore(ctrl)
 
 	j := jwt.NewJWT()
 	u := NewUserAuth(db, j)
