@@ -12,10 +12,10 @@ import (
 type Config struct {
 	// RunAddress - address of server
 	RunAddress string `env:"RUN_ADDRESS" envDefault:"localhost:8080"`
-	// DatabaseUri - uri of database
-	DatabaseUri string `env:"DATABASE_URI" envDefault:"postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"`
-	//AccuralSystemAddress - address of accrual system
-	AccuralSystemAddress string `env:"ACCRUAL_SYSTEM_ADDRESS" envDefault:""`
+	// DatabaseURI - uri of database
+	DatabaseURI string `env:"DATABASE_URI" envDefault:"postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"`
+	// AccrualSystemAddress - address of accrual system
+	AccrualSystemAddress string `env:"ACCRUAL_SYSTEM_ADDRESS" envDefault:""`
 }
 
 // NewConfig - returns config
@@ -24,8 +24,8 @@ func NewConfig() (*Config, error) {
 
 	// Setting values by flags, if env not empty, using env
 	flag.StringVar(&cfg.RunAddress, "a", "localhost:8080", "address and port to run server")
-	flag.StringVar(&cfg.DatabaseUri, "d", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "database address")
-	flag.StringVar(&cfg.AccuralSystemAddress, "r", "", "accrual system address")
+	flag.StringVar(&cfg.DatabaseURI, "d", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "database address")
+	flag.StringVar(&cfg.AccrualSystemAddress, "r", "", "accrual system address")
 
 	if err := env.Parse(&cfg); err != nil {
 		return &Config{}, err
@@ -34,9 +34,9 @@ func NewConfig() (*Config, error) {
 	flag.Parse()
 
 	// if DatabaseDsn not empty, using it
-	addr := strings.Split(cfg.DatabaseUri, " ")
+	addr := strings.Split(cfg.DatabaseURI, " ")
 	if len(addr) > 1 {
-		cfg.DatabaseUri = getConnectionString(addr)
+		cfg.DatabaseURI = getConnectionString(addr)
 	}
 
 	return &cfg, nil

@@ -1,32 +1,87 @@
 package app
 
 import (
+	"context"
+	"database/sql"
 	"fmt"
-	"log"
+	"github.com/DenisquaP/yandex_gophermart/internal/service"
+	"net/http"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/config"
-	"go.uber.org/zap"
+	"github.com/DenisquaP/yandex_gophermart/internal/logger"
+	"github.com/DenisquaP/yandex_gophermart/internal/repository/postgresql"
+	"github.com/DenisquaP/yandex_gophermart/internal/rest/endpoints"
+	"github.com/DenisquaP/yandex_gophermart/internal/rest/router"
+	_ "github.com/DenisquaP/yandex_gophermart/migrations"
+
+	"github.com/jackc/pgx/v5"
+	_ "github.com/jackc/pgx/v5/stdlib"
+	"github.com/pressly/goose/v3"
 )
+
+func init() {
+	logger.NewLogger()
+}
 
 // Run - starts app
 func Run() {
-	newDev, err := zap.NewDevelopment()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer newDev.Sync()
+	ctx := context.Background()
 
-	logger := newDev.Sugar()
-
-	config, err := config.NewConfig()
+	cfg, err := config.NewConfig()
 	if err != nil {
-		logger.Fatalw("Failed to get config", "error", err)
+		logger.Logger.Fatalw("Failed to get config", "error", err)
 	}
 
-	runServer(config, logger)
+	conn, err := pgx.Connect(ctx, cfg.DatabaseURI)
+	if err != nil {
+		logger.Logger.Fatalw("Failed to connect to database", "error", err)
+	}
+	defer func() {
+		if err := conn.Close(ctx); err != nil {
+			logger.Logger.Fatalw("Failed to close connection", "error", err)
+		}
+	}()
+
+	if err := migrate(cfg.DatabaseURI); err != nil {
+		return
+	}
+
+	repo := postgresql.NewRepository(conn)
+	serv := service.NewService(repo, cfg.AccrualSystemAddress)
+	endPoints := endpoints.NewEndpoints(serv)
+	routes := router.NewRouterWithMiddleware(endPoints, serv)
+
+	runServer(cfg, routes)
 }
 
 // runServer - starts server
-func runServer(config *config.Config, logger *zap.SugaredLogger) {
-	logger.Infow(fmt.Sprintf("Starting server on %s...", config))
+func runServer(cfg *config.Config, handler http.Handler) {
+	logger.Logger.Infow(fmt.Sprintf("Starting server on %s...", cfg))
+
+	if err := http.ListenAndServe(cfg.RunAddress, handler); err != nil {
+		logger.Logger.Fatalw("Failed to start server", "error", err)
+	}
+}
+
+// Migrates to database
+func migrate(addr string) error {
+	db, err := sql.Open("pgx", addr)
+	if err != nil {
+		logger.Logger.Errorw("Failed to open DB", "error", err)
+
+		return err
+	}
+	defer func() {
+		if err := db.Close(); err != nil {
+			logger.Logger.Errorw("Failed to close connection", "error", err)
+		}
+	}()
+
+	if err := goose.Up(db, "./migrations"); err != nil {
+		logger.Logger.Errorw("Failed to run migrations", "error", err)
+
+		return err
+	}
+
+	return nil
 }
