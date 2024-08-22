@@ -25,7 +25,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 	if userIDOrder != 0 {
 		// check if user uploaded by other user
 		if userIDOrder != userID {
-			logger.Logger.Errorw("project does not belong to user", "userID", userID, "order", order)
+			logger.Logger.Errorw("project does not belong to user", "userID", userID, "owner", userIDOrder, "order", order)
 			cErr := customerrors.NewCustomError("project does not belong to user", http.StatusConflict)
 
 			return 0, cErr
