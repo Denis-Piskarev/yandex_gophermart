@@ -2,6 +2,7 @@ package user
 
 import (
 	"context"
+
 	modelsUser "github.com/DenisquaP/yandex_gophermart/internal/models/users"
 )
 

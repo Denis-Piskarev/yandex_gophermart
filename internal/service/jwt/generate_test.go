@@ -2,8 +2,9 @@ package jwt
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestJWT_GenerateToken(t *testing.T) {

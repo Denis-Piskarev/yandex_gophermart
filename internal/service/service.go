@@ -8,12 +8,12 @@ import (
 	"github.com/DenisquaP/yandex_gophermart/internal/service/user"
 )
 
-func NewService(store internal.DBStore, accuralSystemAddress string) *internal.Service {
+func NewService(store internal.DBStore, accrualSystemAddress string) *internal.Service {
 	token := jwt.NewJWT()
 	return &internal.Service{
 		AuthInterface:  user.NewUserAuth(store, token),
 		BalanceKeeper:  balance.NewBalance(store),
-		OrderInterface: order.NewOrder(store, accuralSystemAddress),
+		OrderInterface: order.NewOrder(store, accrualSystemAddress),
 		TokenInterface: token,
 	}
 }

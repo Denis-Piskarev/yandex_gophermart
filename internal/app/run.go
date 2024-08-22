@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"github.com/DenisquaP/yandex_gophermart/internal/service"
 	"net/http"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/config"
@@ -11,8 +12,8 @@ import (
 	"github.com/DenisquaP/yandex_gophermart/internal/repository/postgresql"
 	"github.com/DenisquaP/yandex_gophermart/internal/rest/endpoints"
 	"github.com/DenisquaP/yandex_gophermart/internal/rest/router"
-	"github.com/DenisquaP/yandex_gophermart/internal/service"
 	_ "github.com/DenisquaP/yandex_gophermart/migrations"
+
 	"github.com/jackc/pgx/v5"
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"

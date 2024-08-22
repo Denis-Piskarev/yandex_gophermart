@@ -8,6 +8,7 @@ import (
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
 	modelsUser "github.com/DenisquaP/yandex_gophermart/internal/models/users"
+
 	"github.com/jackc/pgx/v5"
 )
 

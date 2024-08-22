@@ -1,10 +1,11 @@
 package middlewares
 
 import (
-	"github.com/DenisquaP/yandex_gophermart/internal"
-	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 	"net/http"
 	"strconv"
+
+	"github.com/DenisquaP/yandex_gophermart/internal"
+	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 )
 
 func IsAuthorized(services *internal.Service) func(http.Handler) http.Handler {

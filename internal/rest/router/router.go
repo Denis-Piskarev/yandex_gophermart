@@ -1,12 +1,14 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/DenisquaP/yandex_gophermart/internal"
 	"github.com/DenisquaP/yandex_gophermart/internal/rest/endpoints"
 	"github.com/DenisquaP/yandex_gophermart/internal/rest/middlewares"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"net/http"
 )
 
 func NewRouterWithMiddleware(endpoints *endpoints.Endpoints, services *internal.Service) http.Handler {

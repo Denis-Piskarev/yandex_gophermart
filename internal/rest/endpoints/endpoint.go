@@ -1,10 +1,11 @@
 package endpoints
 
 import (
-	"github.com/DenisquaP/yandex_gophermart/internal"
-	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 	"net/http"
 	"strconv"
+
+	"github.com/DenisquaP/yandex_gophermart/internal"
+	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 )
 
 type Endpoints struct {

@@ -3,10 +3,12 @@ package postgresql
 import (
 	"context"
 	"fmt"
+	"net/http"
+
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
+
 	"github.com/jackc/pgx/v5"
-	"net/http"
 )
 
 func (r *Repository) Withdraw(ctx context.Context, userID int, sum float32, order string) error {

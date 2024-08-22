@@ -7,6 +7,7 @@ import (
 
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
 	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
+
 	"github.com/golang-jwt/jwt/v5"
 )
 

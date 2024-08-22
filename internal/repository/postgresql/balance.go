@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	"github.com/DenisquaP/yandex_gophermart/internal/logger"
-	"github.com/jackc/pgx/v5"
-
 	modelsBalance "github.com/DenisquaP/yandex_gophermart/internal/models/balance"
+
+	"github.com/jackc/pgx/v5"
 )
 
 func (r *Repository) GetBalance(ctx context.Context, userID int) (modelsBalance.Balance, error) {

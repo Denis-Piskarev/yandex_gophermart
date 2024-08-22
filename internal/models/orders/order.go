@@ -2,7 +2,7 @@ package orders
 
 import "time"
 
-// Order - struct of order
+// Order - str of order
 type Order struct {
 	Number     string    `json:"number"`
 	Status     string    `json:"status"`

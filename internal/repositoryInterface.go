@@ -1,7 +1,10 @@
 package internal
 
+//go:generate mockgen -source=repositoryInterface.go -destination=repository/mocks/mocks_repo.go -package=mocks_repo
+
 import (
 	"context"
+
 	modelsBalance "github.com/DenisquaP/yandex_gophermart/internal/models/balance"
 	"github.com/DenisquaP/yandex_gophermart/internal/models/orders"
 	modelsUser "github.com/DenisquaP/yandex_gophermart/internal/models/users"
