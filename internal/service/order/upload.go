@@ -14,11 +14,51 @@ import (
 	"github.com/DenisquaP/yandex_gophermart/internal/models"
 	"github.com/DenisquaP/yandex_gophermart/internal/models/customerrors"
 	modelsOrder "github.com/DenisquaP/yandex_gophermart/internal/models/orders"
-	"github.com/DenisquaP/yandex_gophermart/internal/service/validation"
+	"github.com/DenisquaP/yandex_gophermart/internal/validation"
 )
 
 func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int, error) {
-	userIDOrder, err := o.db.GetOrder(ctx, order)
+	sc, err := o.validateOrder(ctx, userID, order)
+	if err != nil {
+		return 0, err
+	}
+	if sc != 0 {
+		return sc, nil
+	}
+
+	client := http.Client{}
+	orderSt, statusCode, err := processOrderRequest(&client, order)
+	if err != nil {
+		if statusCode != http.StatusTooManyRequests {
+			return 0, err
+		}
+
+		for err != nil {
+			t := time.After(time.Second)
+			<-t
+
+			// if to many requests > trying to send request every second
+			_, statusCode, err = processOrderRequest(&client, order)
+			if statusCode != http.StatusTooManyRequests {
+				return 0, err
+			}
+		}
+	}
+
+	if err := o.db.UploadOrder(ctx, userID, &orderSt); err != nil {
+		return 0, err
+	}
+
+	// if order is not processed starting goroutine to check and update it
+	if orderSt.Status != models.PROCESSED {
+		go o.updateStatusInDB(context.Background(), &client, order)
+	}
+
+	return http.StatusAccepted, nil
+}
+
+func (o *Order) validateOrder(ctx context.Context, userID int, order string) (int, error) {
+	userIDOrder, err := o.db.GetUserIdByOrder(ctx, order)
 	if err != nil {
 		return 0, err
 	}
@@ -39,46 +79,18 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 	}
 
 	// check order for valid
-	if !validation.IsValidLuhnNumber(order) {
+	if !validation.ValidateLuhn(order) {
 		logger.Logger.Errorw("invalid order number", "userID", userID, "order", order)
 		cErr := customerrors.NewCustomError("invalid order number", http.StatusUnprocessableEntity)
 
 		return 0, cErr
 	}
 
-	orderSt, statusCode, err := sendRequest(order)
-	if err != nil {
-		if statusCode != http.StatusTooManyRequests {
-			return 0, err
-		}
-
-		for err != nil {
-			t := time.After(time.Second)
-			<-t
-
-			// if to many requests > trying to send request every second
-			_, statusCode, err = sendRequest(order)
-			if statusCode != http.StatusTooManyRequests {
-				return 0, err
-			}
-		}
-	}
-
-	if err := o.db.UploadOrder(ctx, userID, &orderSt); err != nil {
-		return 0, err
-	}
-
-	// if order is not processed starting goroutine to check and update it
-	if orderSt.Status != models.PROCESSED {
-		go o.updateStatusInDB(context.Background(), order)
-	}
-
 	return http.StatusAccepted, nil
 }
 
 // Sends request to accrual system
-func sendRequest(order string) (modelsOrder.OrderAccrual, int, error) {
-	client := http.Client{}
+func processOrderRequest(client *http.Client, order string) (modelsOrder.OrderAccrual, int, error) {
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/orders/%s", accrualURL, order), nil)
 	if err != nil {
 		return modelsOrder.OrderAccrual{}, http.StatusInternalServerError, err
@@ -101,7 +113,7 @@ func sendRequest(order string) (modelsOrder.OrderAccrual, int, error) {
 			return modelsOrder.OrderAccrual{}, resp.StatusCode, err
 		}
 
-		orderS, sc, err := sendRequest(order)
+		orderS, sc, err := processOrderRequest(client, order)
 		orderS.Status = models.PROCESSING
 		return orderS, sc, err
 	}
@@ -117,7 +129,7 @@ func sendRequest(order string) (modelsOrder.OrderAccrual, int, error) {
 }
 
 // Use for update order`s status code in database
-func (o *Order) updateStatusInDB(ctx context.Context, order string) {
+func (o *Order) updateStatusInDB(ctx context.Context, client *http.Client, order string) {
 	var lastUpdateStatus string
 
 	// until status != PROCESSED or INVALID
@@ -126,7 +138,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 		t := time.After(2 * time.Second)
 		<-t
 
-		orderStruct, statusCode, err := sendRequest(order)
+		orderStruct, statusCode, err := processOrderRequest(client, order)
 		// if status code not StatusTooManyRequests returning error
 		if statusCode != http.StatusTooManyRequests {
 			return
@@ -134,7 +146,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 
 		// if to many requests > trying to send request every second
 		for err != nil {
-			_, statusCode, err = sendRequest(order)
+			_, statusCode, err = processOrderRequest(client, order)
 			if statusCode != http.StatusTooManyRequests {
 				return
 			}

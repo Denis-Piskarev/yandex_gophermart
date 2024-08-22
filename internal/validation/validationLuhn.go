@@ -2,8 +2,8 @@ package validation
 
 import "strconv"
 
-// IsValidLuhnNumber - checks order for right type
-func IsValidLuhnNumber(orderNumber string) bool {
+// ValidateLuhn - checks order for right type
+func ValidateLuhn(orderNumber string) bool {
 	sum := 0
 	isSecondDigit := false
 

@@ -57,7 +57,7 @@ func (r *Repository) UploadOrder(ctx context.Context, userID int, order *modelsO
 	return nil
 }
 
-func (r *Repository) GetOrder(ctx context.Context, order string) (userID int, err error) {
+func (r *Repository) GetUserIdByOrder(ctx context.Context, order string) (userID int, err error) {
 	query := `SELECT user_id FROM orders WHERE number = $1`
 
 	if err := r.db.QueryRow(ctx, query, order).Scan(&userID); err != nil {
