@@ -58,7 +58,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 }
 
 func (o *Order) validateOrder(ctx context.Context, userID int, order string) (int, error) {
-	userIDOrder, err := o.db.GetUserIdByOrder(ctx, order)
+	userIDOrder, err := o.db.GetUserIDByOrder(ctx, order)
 	if err != nil {
 		return 0, err
 	}

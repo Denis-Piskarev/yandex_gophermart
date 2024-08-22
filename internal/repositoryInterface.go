@@ -29,7 +29,7 @@ type DBStore interface {
 	// GetWithdrawals - gets withdrawals of user. Returns custom error from models if user has no withdrawals
 	GetWithdrawals(ctx context.Context, userID int) ([]*modelsUser.Withdrawals, error)
 	// GetUserIdByOrder - gets userID and order if order exists
-	GetUserIdByOrder(ctx context.Context, order string) (userID int, err error)
+	GetUserIDByOrder(ctx context.Context, order string) (userID int, err error)
 	// Withdraw - withdraws balance of user
 	Withdraw(ctx context.Context, userID int, sum float32, order string) error
 }

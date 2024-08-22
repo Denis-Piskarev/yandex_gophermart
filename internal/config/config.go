@@ -3,8 +3,9 @@ package config
 import (
 	"flag"
 	"fmt"
-	"github.com/caarlos0/env"
 	"strings"
+
+	"github.com/caarlos0/env"
 )
 
 // Config - config of app
@@ -18,61 +19,27 @@ type Config struct {
 }
 
 // NewConfig - returns config
-//func NewConfig() (*Config, error) {
-//	var cfg Config
-//
-//	// Setting values by flags, if env not empty, using env
-//	flag.StringVar(&cfg.RunAddress, "a", "localhost:8080", "address and port to run server")
-//	flag.StringVar(&cfg.DatabaseURI, "d", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "database address")
-//	flag.StringVar(&cfg.AccrualSystemAddress, "r", "", "accrual system address")
-//
-//	if err := env.Parse(&cfg); err != nil {
-//		return &Config{}, err
-//	}
-//
-//	flag.Parse()
-//
-//	// if DatabaseDsn not empty, using it
-//	addr := strings.Split(cfg.DatabaseURI, " ")
-//	if len(addr) > 1 {
-//		cfg.DatabaseURI = getConnectionString(addr)
-//	}
-//
-//	return &cfg, nil
-//}
-
 func NewConfig() (*Config, error) {
-	cfg := &Config{}
+	var cfg Config
 
-	parseFlags(cfg)
-
-	if err := loadEnvVariables(cfg); err != nil {
-		return nil, err
-	}
-
-	if err := processConfig(cfg); err != nil {
-		return nil, err
-	}
-	return cfg, nil
-}
-
-func loadEnvVariables(cfg *Config) error {
-	return env.Parse(cfg)
-}
-
-func parseFlags(cfg *Config) {
+	// Setting values by flags, if env not empty, using env
 	flag.StringVar(&cfg.RunAddress, "a", "localhost:8080", "address and port to run server")
 	flag.StringVar(&cfg.DatabaseURI, "d", "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable", "database address")
 	flag.StringVar(&cfg.AccrualSystemAddress, "r", "", "accrual system address")
-	flag.Parse()
-}
 
-func processConfig(cfg *Config) error {
+	if err := env.Parse(&cfg); err != nil {
+		return &Config{}, err
+	}
+
+	flag.Parse()
+
+	// if DatabaseDsn not empty, using it
 	addr := strings.Split(cfg.DatabaseURI, " ")
 	if len(addr) > 1 {
 		cfg.DatabaseURI = getConnectionString(addr)
 	}
-	return nil
+
+	return &cfg, nil
 }
 
 // getConnectionString - returns postgres connection string
