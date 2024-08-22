@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"net/http"
@@ -45,7 +46,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 		return 0, cErr
 	}
 
-	orderSt, statusCode, err := sendRequest(true, order)
+	orderSt, statusCode, err := sendRequest(order)
 	if err != nil {
 		if statusCode != http.StatusTooManyRequests {
 			return 0, err
@@ -56,7 +57,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 			<-t
 
 			// if to many requests > trying to send request every second
-			_, statusCode, err = sendRequest(false, order)
+			_, statusCode, err = sendRequest(order)
 			if statusCode != http.StatusTooManyRequests {
 				return 0, err
 			}
@@ -76,46 +77,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 }
 
 // Sends request to accrual system
-func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error) {
-	// register order in system
-	//if first {
-	//	var err error
-	//
-	//	codeRegister, err := registerInSystem()
-	//	if err != nil && !errors.Is(err, fmt.Errorf("not expected status code: %d", http.StatusTooManyRequests)) {
-	//		return modelsOrder.OrderAccrual{}, codeRegister, err
-	//	}
-	//
-	//	for codeRegister == http.StatusTooManyRequests {
-	//		t := time.After(30 * time.Millisecond)
-	//		<-t
-	//
-	//		codeRegister, err = registerInSystem()
-	//		if err != nil {
-	//			if codeRegister == http.StatusTooManyRequests {
-	//				err = nil
-	//			}
-	//		}
-	//	}
-	//
-	//	codeUpload, err := uploadOrderToSystem(order)
-	//	if err != nil && !errors.Is(err, fmt.Errorf("not expected status code uploading order to system: %d", http.StatusTooManyRequests)) {
-	//		return modelsOrder.OrderAccrual{}, codeRegister, err
-	//	}
-	//
-	//	for codeUpload == http.StatusTooManyRequests {
-	//		t := time.After(30 * time.Millisecond)
-	//		<-t
-	//		codeUpload, err = uploadOrderToSystem(order)
-	//		if err != nil {
-	//			if codeUpload == http.StatusTooManyRequests {
-	//				err = nil
-	//			}
-	//		}
-	//	}
-	//
-	//}
-
+func sendRequest(order string) (modelsOrder.OrderAccrual, int, error) {
 	client := http.Client{}
 	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/orders/%s", accuralURL, order), nil)
 	if err != nil {
@@ -134,10 +96,13 @@ func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error
 		}
 	}()
 
-	//if resp.StatusCode == http.StatusNoContent {
-	//	cErr := customerrors.NewCustomError("no content", http.StatusNoContent)
-	//	return modelsOrder.OrderAccrual{}, http.StatusNoContent, cErr
-	//}
+	if resp.StatusCode == http.StatusNoContent {
+		if err := addNew(order); err != nil {
+			return modelsOrder.OrderAccrual{}, resp.StatusCode, err
+		}
+
+		return sendRequest(order)
+	}
 
 	var orderStruct modelsOrder.OrderAccrual
 	if err := json.NewDecoder(resp.Body).Decode(&orderStruct); err != nil {
@@ -159,7 +124,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 		t := time.After(2 * time.Second)
 		<-t
 
-		orderStruct, statusCode, err := sendRequest(false, order)
+		orderStruct, statusCode, err := sendRequest(order)
 		// if status code not StatusTooManyRequests returning error
 		if statusCode != http.StatusTooManyRequests {
 			return
@@ -167,7 +132,7 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 
 		// if to many requests > trying to send request every second
 		for err != nil {
-			_, statusCode, err = sendRequest(false, order)
+			_, statusCode, err = sendRequest(order)
 			if statusCode != http.StatusTooManyRequests {
 				return
 			}
@@ -186,6 +151,47 @@ func (o *Order) updateStatusInDB(ctx context.Context, order string) {
 		}
 		lastUpdateStatus = orderStruct.Status
 	}
+}
+
+func addNew(order string) error {
+	codeRegister, err := registerInSystem()
+	if err != nil && !errors.Is(err, fmt.Errorf("not expected status code: %d", http.StatusTooManyRequests)) {
+		cErr := customerrors.NewCustomError(err.Error(), codeRegister)
+
+		return cErr
+	}
+
+	for codeRegister == http.StatusTooManyRequests {
+		t := time.After(30 * time.Millisecond)
+		<-t
+
+		codeRegister, err = registerInSystem()
+		if err != nil {
+			if codeRegister == http.StatusTooManyRequests {
+				err = nil
+			}
+		}
+	}
+
+	codeUpload, err := uploadOrderToSystem(order)
+	if err != nil && !errors.Is(err, fmt.Errorf("not expected status code uploading order to system: %d", http.StatusTooManyRequests)) {
+		cErr := customerrors.NewCustomError(err.Error(), codeRegister)
+
+		return cErr
+	}
+
+	for codeUpload == http.StatusTooManyRequests {
+		t := time.After(30 * time.Millisecond)
+		<-t
+		codeUpload, err = uploadOrderToSystem(order)
+		if err != nil {
+			if codeUpload == http.StatusTooManyRequests {
+				err = nil
+			}
+		}
+	}
+
+	return nil
 }
 
 func registerInSystem() (int, error) {
