@@ -17,7 +17,7 @@ func NewEndpoints(services *internal.Service) *Endpoints {
 	}
 }
 
-func getuserIDFromHeader(r *http.Request) (int, error) {
+func getUserIDFromHeader(r *http.Request) (int, error) {
 	userIDStr := r.Header.Get("userID")
 
 	userID, err := strconv.Atoi(userIDStr)

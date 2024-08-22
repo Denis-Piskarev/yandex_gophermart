@@ -18,25 +18,10 @@ func (e *Endpoints) Withdraw(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userID, err := getuserIDFromHeader(r)
+	userID, err := getUserIDFromHeader(r)
 	if err != nil {
 		return
 	}
-
-	// uploading order to system
-	//_, err = e.services.UploadOrder(r.Context(), userID, request.Order)
-	//if err != nil {
-	//	var cErr customerrors.CustomError
-	//	// if we got custom err then set status code from err
-	//	if errors.As(err, &cErr) {
-	//		http.Error(w, cErr.Error(), cErr.StatusCode)
-	//
-	//		return
-	//	}
-	//
-	//	http.Error(w, err.Error(), http.StatusInternalServerError)
-	//	return
-	//}
 
 	// withdrawing
 	if err := e.services.Withdraw(r.Context(), userID, request.Sum, request.Order); err != nil {

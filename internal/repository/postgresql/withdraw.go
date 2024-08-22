@@ -46,8 +46,8 @@ func (r *Repository) Withdraw(ctx context.Context, userID int, sum float32, orde
 		return cErr
 	}
 
-	queryUpateCurrent := `UPDATE users SET current = $1 WHERE id = $2`
-	result, err := tx.Exec(ctx, queryUpateCurrent, current-sum, userID)
+	queryUpdateCurrent := `UPDATE users SET current = $1 WHERE id = $2`
+	result, err := tx.Exec(ctx, queryUpdateCurrent, current-sum, userID)
 	if err != nil {
 		logger.Logger.Errorw("Error updating user balance", "userID", userID, "error", err)
 

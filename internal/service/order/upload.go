@@ -79,7 +79,7 @@ func (o *Order) UploadOrder(ctx context.Context, userID int, order string) (int,
 // Sends request to accrual system
 func sendRequest(order string) (modelsOrder.OrderAccrual, int, error) {
 	client := http.Client{}
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/orders/%s", accuralURL, order), nil)
+	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/api/orders/%s", accrualURL, order), nil)
 	if err != nil {
 		return modelsOrder.OrderAccrual{}, http.StatusInternalServerError, err
 	}
@@ -216,7 +216,7 @@ func registerInSystem() (int, error) {
 		return 0, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/goods", accuralURL), bytes.NewBuffer(jBody1))
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/goods", accrualURL), bytes.NewBuffer(jBody1))
 	if err != nil {
 		logger.Logger.Errorw("error request to accrual system", "error", err)
 
@@ -230,7 +230,11 @@ func registerInSystem() (int, error) {
 
 		return 0, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			logger.Logger.Errorw("error closing response body", "error", err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusOK {
 		logger.Logger.Errorw("not expected status code")
@@ -270,7 +274,7 @@ func uploadOrderToSystem(order string) (int, error) {
 		return 0, err
 	}
 
-	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/orders", accuralURL), bytes.NewBuffer(jBody))
+	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("%s/api/orders", accrualURL), bytes.NewBuffer(jBody))
 	if err != nil {
 		logger.Logger.Errorw("error request to accrual system", "error", err)
 
@@ -284,7 +288,11 @@ func uploadOrderToSystem(order string) (int, error) {
 
 		return 0, err
 	}
-	defer resp.Body.Close()
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			logger.Logger.Errorw("error closing response body", "error", err)
+		}
+	}()
 
 	if resp.StatusCode != http.StatusAccepted {
 		logger.Logger.Errorw("not expected status code")

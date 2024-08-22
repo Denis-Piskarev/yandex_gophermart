@@ -12,7 +12,7 @@ import (
 
 // UploadOrder - uploads order to system
 func (e *Endpoints) UploadOrder(w http.ResponseWriter, r *http.Request) {
-	userID, err := getuserIDFromHeader(r)
+	userID, err := getUserIDFromHeader(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 
@@ -50,7 +50,7 @@ func (e *Endpoints) UploadOrder(w http.ResponseWriter, r *http.Request) {
 func (e *Endpoints) GetOrders(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
-	userID, err := getuserIDFromHeader(r)
+	userID, err := getUserIDFromHeader(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 

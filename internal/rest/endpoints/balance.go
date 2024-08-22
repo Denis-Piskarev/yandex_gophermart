@@ -8,7 +8,7 @@ import (
 // GetBalance - gets balance of user
 func (e *Endpoints) GetBalance(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
-	userID, err := getuserIDFromHeader(r)
+	userID, err := getUserIDFromHeader(r)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 

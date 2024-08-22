@@ -2,7 +2,6 @@ package user
 
 import (
 	"context"
-	"log"
 )
 
 func (u *User) RegisterUser(ctx context.Context, username string, password string) (string, error) {
@@ -20,9 +19,5 @@ func (u *User) RegisterUser(ctx context.Context, username string, password strin
 		return "", err
 	}
 
-	log.Println(id)
-
-	token, err := u.token.GenerateToken(id)
-
-	return token, err
+	return u.token.GenerateToken(id)
 }

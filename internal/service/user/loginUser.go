@@ -30,7 +30,5 @@ func (u *User) LoginUser(ctx context.Context, username, password string) (string
 	}
 
 	// generating token
-	token, err := u.token.GenerateToken(userID)
-
-	return token, err
+	return u.token.GenerateToken(userID)
 }

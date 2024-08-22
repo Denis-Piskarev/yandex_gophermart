@@ -10,6 +10,4 @@ import (
 type BalanceKeeper interface {
 	// GetBalance - gets balance of user
 	GetBalance(ctx context.Context, userID int) (modelsBalance.Balance, error)
-	// WithdrawBalance -
-	WithdrawBalance(ctx context.Context, userID int, amount float64) error
 }

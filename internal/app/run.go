@@ -46,7 +46,7 @@ func Run() {
 	}
 
 	repo := postgresql.NewRepository(conn)
-	serv := service.NewService(repo, cfg.AccuralSystemAddress)
+	serv := service.NewService(repo, cfg.AccrualSystemAddress)
 	endPoints := endpoints.NewEndpoints(serv)
 	routes := router.NewRouterWithMiddleware(endPoints, serv)
 
