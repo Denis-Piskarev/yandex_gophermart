@@ -101,7 +101,9 @@ func sendRequest(order string) (modelsOrder.OrderAccrual, int, error) {
 			return modelsOrder.OrderAccrual{}, resp.StatusCode, err
 		}
 
-		return sendRequest(order)
+		orderS, sc, err := sendRequest(order)
+		orderS.Status = models.PROCESSING
+		return orderS, sc, err
 	}
 
 	var orderStruct modelsOrder.OrderAccrual
