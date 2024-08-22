@@ -134,10 +134,10 @@ func sendRequest(first bool, order string) (modelsOrder.OrderAccrual, int, error
 		}
 	}()
 
-	if resp.StatusCode == http.StatusNoContent {
-		cErr := customerrors.NewCustomError("no content", http.StatusNoContent)
-		return modelsOrder.OrderAccrual{}, http.StatusNoContent, cErr
-	}
+	//if resp.StatusCode == http.StatusNoContent {
+	//	cErr := customerrors.NewCustomError("no content", http.StatusNoContent)
+	//	return modelsOrder.OrderAccrual{}, http.StatusNoContent, cErr
+	//}
 
 	var orderStruct modelsOrder.OrderAccrual
 	if err := json.NewDecoder(resp.Body).Decode(&orderStruct); err != nil {
