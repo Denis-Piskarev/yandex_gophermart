@@ -66,21 +66,6 @@ func (mr *MockDBStoreMockRecorder) GetBalance(ctx, userID interface{}) *gomock.C
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBalance", reflect.TypeOf((*MockDBStore)(nil).GetBalance), ctx, userID)
 }
 
-// GetOrder mocks base method.
-func (m *MockDBStore) GetOrder(ctx context.Context, order string) (int, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetOrder", ctx, order)
-	ret0, _ := ret[0].(int)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetOrder indicates an expected call of GetOrder.
-func (mr *MockDBStoreMockRecorder) GetOrder(ctx, order interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrder", reflect.TypeOf((*MockDBStore)(nil).GetOrder), ctx, order)
-}
-
 // GetOrders mocks base method.
 func (m *MockDBStore) GetOrders(ctx context.Context, userID int) ([]*orders.Order, error) {
 	m.ctrl.T.Helper()
@@ -94,6 +79,21 @@ func (m *MockDBStore) GetOrders(ctx context.Context, userID int) ([]*orders.Orde
 func (mr *MockDBStoreMockRecorder) GetOrders(ctx, userID interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetOrders", reflect.TypeOf((*MockDBStore)(nil).GetOrders), ctx, userID)
+}
+
+// GetUserIDByOrder mocks base method.
+func (m *MockDBStore) GetUserIDByOrder(ctx context.Context, order string) (int, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserIDByOrder", ctx, order)
+	ret0, _ := ret[0].(int)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserIDByOrder indicates an expected call of GetUserIDByOrder.
+func (mr *MockDBStoreMockRecorder) GetUserIDByOrder(ctx, order interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserIDByOrder", reflect.TypeOf((*MockDBStore)(nil).GetUserIDByOrder), ctx, order)
 }
 
 // GetWithdrawals mocks base method.
